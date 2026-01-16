@@ -1,0 +1,38 @@
+.rescue-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .map-layout {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  
+  .map-wrapper {
+    position: relative;
+    flex: 1;
+  }
+  
+  .leaflet-container {
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* GPS BUTTON */
+  .gps-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
+  

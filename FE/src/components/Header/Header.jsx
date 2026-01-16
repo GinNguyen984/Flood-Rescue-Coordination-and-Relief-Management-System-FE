@@ -1,13 +1,13 @@
 import "./Header.css";
-
+import { Link } from "react-router-dom";
 const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
         {/* LEFT - LOGO */}
-        <div className="header-logo">
+        <div className="header-logo">        
           <img
-            src="/logo.png"
+            src="https://intriphat.com/wp-content/uploads/2023/09/logo-chu-thap-do.png"
             alt="Cứu hộ Việt Nam"
           />
         </div>
@@ -17,7 +17,7 @@ const Header = () => {
           <a href="#">TRA CỨU</a>
           <a href="#">CẨM NANG</a>
           <a href="#">LIÊN HỆ</a>
-          <a href="#">BẢN ĐỒ</a>
+          <Link to="/map">BẢN ĐỒ</Link>
         </nav>
 
         {/* RIGHT - SEARCH + HOTLINE + BUTTON */}

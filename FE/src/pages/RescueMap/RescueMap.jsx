@@ -67,9 +67,7 @@ const RescueMap = () => {
 
         <div className="map-wrapper">
           {/* GPS BUTTON */}
-          <button className="gps-btn" onClick={handleLocate}>
-            📍
-          </button>
+     
 
           <MapContainer
             center={center}
@@ -78,7 +76,11 @@ const RescueMap = () => {
             zoomControl={false} // tắt mặc định
             whenCreated={(map) => (mapRef.current = map)}
             style={{ width: "100%", height: "100%" }}
+
           >
+                 <button className="gps-btn" onClick={handleLocate}>
+            📍
+          </button>
             {/* ZOOM IN / OUT ICON */}
             <ZoomControl position="bottomright" />
 

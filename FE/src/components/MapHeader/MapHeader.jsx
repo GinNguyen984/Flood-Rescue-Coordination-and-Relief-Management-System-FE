@@ -14,7 +14,14 @@ const MapHeader = () => {
       </div>
 
       {/* CENTER NAV */}
+    
       <nav className="center">
+      <NavLink
+          to="/"
+          className={({ isActive }) => (isActive ? "active" : "")}
+        >
+          Trang Chủ
+        </NavLink>
         <NavLink
           to="/map"
           className={({ isActive }) => (isActive ? "active" : "")}
@@ -29,12 +36,7 @@ const MapHeader = () => {
           Đội cứu trợ
         </NavLink>
 
-        <NavLink
-          to="/stats"
-          className={({ isActive }) => (isActive ? "active" : "")}
-        >
-          Thống kê
-        </NavLink>
+     
       </nav>
 
       {/* RIGHT */}

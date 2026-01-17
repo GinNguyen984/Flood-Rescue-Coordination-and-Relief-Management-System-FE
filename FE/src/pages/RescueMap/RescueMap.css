@@ -13,6 +13,7 @@
   .map-wrapper {
     position: relative;
     flex: 1;
+    
   }
   
   .leaflet-container {
@@ -23,7 +24,7 @@
   /* GPS BUTTON */
   .gps-btn {
     position: absolute;
-    top: 20px;
+    top: 80px;
     right: 20px;
     z-index: 1000;
     width: 44px;

@@ -16,7 +16,7 @@ import Approve from "../pages/Manager/Approval/ApprovalManagement";
 import ManagerRescueTeam from "../pages/Manager/RescueTeamManagement/RescueTeamManagement";
 
 /* ================= COORDINATOR ================= */
-// import CoordinatorDispatch from "../pages/Coordinator/Dispatch";
+import CoordinatorDispatch from "../pages/RescueCoordinator/MissionDispatch/MissionDispatch";
 // import CoordinatorMap from "../pages/Coordinator/Map";
 // import CoordinatorResources from "../pages/Coordinator/Resources";
 // import CoordinatorReports from "../pages/Coordinator/Reports";
@@ -77,7 +77,7 @@ export default function AppRoutes() {
       </Route>
 
       {/* ================= COORDINATOR ================= */}
-      {/* <Route
+      <Route
         path="/coordinator"
         element={
           <RequireAuth role="coordinator">
@@ -85,11 +85,12 @@ export default function AppRoutes() {
           </RequireAuth>
         }
       >
-        <Route index element={<CoordinatorDispatch />} />
+      <Route index element={<CoordinatorDispatch />} />
+        {/* <Route index element={<CoordinatorDispatch />} />
         <Route path="map" element={<CoordinatorMap />} />
         <Route path="resources" element={<CoordinatorResources />} />
-        <Route path="reports" element={<CoordinatorReports />} />
-      </Route> */}
+        <Route path="reports" element={<CoordinatorReports />} /> */}
+      </Route>
 
       {/* ================= RESCUE ================= */}
       {/* <Route

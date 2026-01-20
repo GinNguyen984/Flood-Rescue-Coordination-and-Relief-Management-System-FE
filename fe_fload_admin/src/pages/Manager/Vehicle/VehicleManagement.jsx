@@ -57,6 +57,29 @@ const statusMap = {
 export default function VehicleManagement() {
   return (
     <div className="vehicle-page">
+        {/* ===== SUMMARY ===== */}
+      <div className="vehicle-summary">
+        <SummaryCard
+          icon={<BarChartOutlined />}
+          title="HIỆU SUẤT SỬ DỤNG"
+          value="78.5%"
+          note="+2.4% tháng qua"
+        />
+        <SummaryCard
+          icon={<ToolOutlined />}
+          title="ĐANG BẢO TRÌ"
+          value="04"
+          note="Phương tiện"
+          color="orange"
+        />
+        <SummaryCard
+          icon={<CheckCircleOutlined />}
+          title="SẴN SÀNG ĐIỀU ĐỘNG"
+          value="22"
+          note="Phương tiện"
+          color="green"
+        />
+      </div>
       {/* ===== FILTER ===== */}
       <div className="vehicle-filter">
         <Select defaultValue="all" style={{ width: 200 }}>
@@ -110,7 +133,7 @@ export default function VehicleManagement() {
 
       {/* ===== PAGINATION ===== */}
       <div className="vehicle-pagination">
-        <span>Hiển thị 4 trong số 42 phương tiện cứu hộ</span>
+        {/* <span>Hiển thị 4 trong số 42 phương tiện cứu hộ</span> */}
         <div>
           <Button>Trước</Button>
           <Button type="primary">1</Button>
@@ -120,29 +143,7 @@ export default function VehicleManagement() {
         </div>
       </div>
 
-      {/* ===== SUMMARY ===== */}
-      <div className="vehicle-summary">
-        <SummaryCard
-          icon={<BarChartOutlined />}
-          title="HIỆU SUẤT SỬ DỤNG"
-          value="78.5%"
-          note="+2.4% tháng qua"
-        />
-        <SummaryCard
-          icon={<ToolOutlined />}
-          title="ĐANG BẢO TRÌ"
-          value="04"
-          note="Phương tiện"
-          color="orange"
-        />
-        <SummaryCard
-          icon={<CheckCircleOutlined />}
-          title="SẴN SÀNG ĐIỀU ĐỘNG"
-          value="22"
-          note="Phương tiện"
-          color="green"
-        />
-      </div>
+      
     </div>
   );
 }

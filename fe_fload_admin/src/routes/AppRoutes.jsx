@@ -11,7 +11,7 @@ import DashboardOverview from "../pages/Manager/Dashboard/DashboardOverview";
 import Vehicle from "../pages/Manager/Vehicle/VehicleManagement";
 
 // import ManagerInfo from "../pages/Manager/Info";
-// import Warehouse from "../pages/Manager/Warehouse";
+import Inventory from "../pages/Manager/Inventory/InventoryManagement";
 // import Approve from "../pages/Manager/Approve";
 // import ManagerRescueTeam from "../pages/Manager/RescueTeam";
 
@@ -67,6 +67,7 @@ export default function AppRoutes() {
       >
         <Route index element={<DashboardOverview />} />
         <Route path="vehicles" element={<Vehicle />} />
+        <Route path="inventory" element={<Inventory />} />
         {/* <Route path="info" element={<ManagerInfo />} />
         <Route path="warehouse" element={<Warehouse />} />
         <Route path="approve" element={<Approve />} />

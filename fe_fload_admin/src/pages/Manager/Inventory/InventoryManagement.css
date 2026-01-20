@@ -1,0 +1,266 @@
+/* ================= PAGE ================= */
+.inventory-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  /* ================= HEADER ================= */
+  .inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .inventory-header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  
+  .header-actions button + button {
+    margin-left: 10px;
+  }
+  
+  /* ================= STATS ================= */
+  .inventory-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  
+  .stat-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    position: relative;
+  }
+  
+  .stat-card.alert {
+    box-shadow: 0 12px 30px rgba(251, 146, 60, 0.35);
+  }
+  
+  .stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .stat-card span {
+    font-size: 12px;
+    color: #64748b;
+  }
+  
+  .stat-card h3 {
+    font-size: 26px;
+    margin: 0;
+  }
+  
+  /* ================= TABLE CONTAINER ================= */
+  .inventory-table {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow:
+      0 20px 40px rgba(15, 23, 42, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  }
+  
+  /* ================= TABLE FILTER ================= */
+  .table-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  
+  .tabs span {
+    margin-right: 10px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #475569;
+    transition: all 0.25s ease;
+  }
+  
+  .tabs span:hover {
+    background: #f1f5f9;
+  }
+  
+  .tabs .active {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.35);
+  }
+  
+  /* ================= TABLE ================= */
+  .table-head,
+  .table-row {
+    display: grid;
+    grid-template-columns: 1.2fr 2.6fr 1.2fr 1.6fr 0.8fr 1.2fr 1fr;
+    align-items: center;
+  }
+  
+  .table-head {
+    padding: 12px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+  }
+  
+  .table-row {
+    padding: 14px 6px;
+    border-top: 1px solid #e5e7eb;
+    transition: background 0.25s ease;
+  }
+  
+  .table-row:hover {
+    background: linear-gradient(
+      90deg,
+      rgba(14, 165, 233, 0.05),
+      transparent
+    );
+  }
+  
+  /* ================= ITEM ================= */
+  .item-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  
+  .code {
+    font-weight: 600;
+    color: #0f172a;
+  }
+  
+  .category {
+    color: #64748b;
+  }
+  
+  /* ================= STOCK ================= */
+  .stock span {
+    font-weight: 600;
+  }
+  
+  .stock .low {
+    color: #fb923c;
+  }
+  
+  /* ================= ACTION ================= */
+  .actions svg {
+    margin-right: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    color: #64748b;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  .actions svg:hover {
+    color: #0ea5e9;
+    transform: scale(1.15);
+  }
+  
+  /* ================= FOOTER ================= */
+  .table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+  }
+  
+  /* ================= BOTTOM ================= */
+  .inventory-bottom {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+  
+  .history,
+  .quick-help {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  }
+  
+  .history h3,
+  .quick-help h3 {
+    margin-top: 0;
+  }
+  
+  /* ================= HISTORY ================= */
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+  }
+  
+  .history-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .history-icon.green {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+  
+  .history-icon.red {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+  
+  .plus {
+    font-weight: 700;
+    color: #16a34a;
+  }
+  
+  .minus {
+    font-weight: 700;
+    color: #dc2626;
+  }
+  
+  /* ================= QUICK HELP ================= */
+  .quick-help {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: #ffffff;
+  }
+  
+  .quick-help p {
+    font-size: 13px;
+    opacity: 0.95;
+  }
+  
+  .quick-help button {
+    margin-top: 12px;
+    background: #ffffff;
+    color: #0ea5e9;
+    font-weight: 600;
+  }
+  

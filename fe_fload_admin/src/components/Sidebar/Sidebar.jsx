@@ -78,7 +78,7 @@ const menuByRole = {
     {
       label: "Kho hàng",
       icon: <InboxOutlined />,
-      path: "/manager/warehouse",
+      path: "/manager/inventory",
     },
     {
       label: "Phê duyệt",

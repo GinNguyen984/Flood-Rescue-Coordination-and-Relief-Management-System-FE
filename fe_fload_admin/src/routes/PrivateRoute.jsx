@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 
-export default function PrivateRoute({ children, role }) {
-  const isAuth = localStorage.getItem("isAuth");
+export default function RequireAuth({ children, role }) {
+  const isAuth = localStorage.getItem("isAuth") === "true";
   const userRole = localStorage.getItem("role");
 
   if (!isAuth) {
@@ -12,5 +12,6 @@ export default function PrivateRoute({ children, role }) {
     return <Navigate to="/login" replace />;
   }
 
+  // 🔥 CỰC KỲ QUAN TRỌNG
   return children;
 }

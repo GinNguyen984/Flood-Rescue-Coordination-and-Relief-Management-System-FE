@@ -17,12 +17,20 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+  // DEMO DATA
   const accounts = [
     { username: "admin", password: "123456", role: "admin" },
     { username: "manager", password: "123456", role: "manager" },
     { username: "coordinator", password: "123456", role: "coordinator" },
     { username: "rescue", password: "123456", role: "rescue" },
   ];
+
+  const roleRedirect = {
+    admin: "/admin",
+    manager: "/manager",
+    coordinator: "/coordinator",
+    rescue: "/rescue",
+  };
 
   const handleLogin = () => {
     let newErrors = {};
@@ -42,22 +50,24 @@ export default function Login() {
       return;
     }
 
+    // ✅ LOGIN OK
     localStorage.setItem("isAuth", "true");
     localStorage.setItem("role", user.role);
 
-    navigate(`/${user.role}`);
+    navigate(roleRedirect[user.role] || "/login", { replace: true });
   };
 
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1 >Đăng nhập</h1>
+        <h1>Đăng nhập</h1>
         <div className="login-line" />
 
         <p className="login-desc">
           Truy cập hệ thống quản trị vận hành cao cấp
         </p>
 
+        {/* USERNAME */}
         <label className="login-label">TÀI KHOẢN NỘI BỘ</label>
         <TextField
           fullWidth
@@ -78,6 +88,7 @@ export default function Login() {
           <span className="error-text">{errors.username}</span>
         )}
 
+        {/* PASSWORD */}
         <label className="login-label">MẬT KHẨU HỆ THỐNG</label>
         <TextField
           fullWidth

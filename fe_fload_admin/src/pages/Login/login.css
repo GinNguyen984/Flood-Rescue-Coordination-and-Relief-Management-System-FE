@@ -1,59 +1,54 @@
+/* ===== PAGE ===== */
 .login-page {
   min-height: 100vh;
-  background: radial-gradient(circle at top, #1e2a38, #0b0f14);
+  background: radial-gradient(circle at top, #1f2937, #020617);
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-family: "Inter", sans-serif;
+  justify-content: center;
 }
 
+/* ===== CARD ===== */
 .login-card {
   width: 420px;
-  background: rgba(15, 20, 30, 0.95);
-  border-radius: 16px;
-  padding: 36px 32px;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 20px 50px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(180deg, #020617, #020617);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
   color: #fff;
 }
 
 .login-card h1 {
   margin: 0;
-  font-size: 26px;
-  font-weight: 600;
+  font-size: 32px;
 }
 
 .login-line {
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, #4facfe, #00f2fe);
-  margin: 12px 0 20px;
-  border-radius: 10px;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #60a5fa, #67e8f9);
+  border-radius: 999px;
+  margin: 14px 0;
 }
 
 .login-desc {
-  font-size: 14px;
-  color: #9aa4b2;
+  color: #9ca3af;
   margin-bottom: 28px;
 }
 
+/* ===== LABEL ===== */
 .login-label {
-  display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #aab4c3;
+  color: #9ca3af;
   margin-bottom: 6px;
-  margin-top: 16px;
+  display: block;
 }
 
-.login-input {
-  background: #121826;
-}
-
+/* ===== MUI INPUT OVERRIDE ===== */
 .MuiFilledInput-root {
-  background: #121826 !important;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px;
+  color: #fff;
 }
 
 .MuiFilledInput-root:before,
@@ -61,40 +56,62 @@
   display: none;
 }
 
-.MuiInputBase-input {
+.MuiFilledInput-input {
   color: #fff !important;
+}
+
+.MuiFilledInput-root:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.MuiFilledInput-root.Mui-focused {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 🚫 AUTOFILL TRẮNG – FIX */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #020617 inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff;
+}
+
+/* icons */
+.MuiSvgIcon-root {
+  color: #9ca3af;
 }
 
 .eye {
   cursor: pointer;
-  color: #7f8ea3;
 }
 
+/* ===== ERROR ===== */
 .error-text {
-  display: block;
+  color: #f87171;
+  font-size: 13px;
   margin-top: 4px;
-  font-size: 12px;
-  color: #ff4d4f;
+  display: block;
 }
 
+/* ===== REMEMBER ===== */
 .remember {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 18px 0;
-  font-size: 13px;
-  color: #cbd5e1;
+  margin: 20px 0;
+  color: #d1d5db;
 }
 
+/* ===== BUTTON ===== */
 .login-btn {
-  background: linear-gradient(90deg, #4facfe, #00f2fe) !important;
-  border: none !important;
-  height: 44px;
+  height: 52px;
+  border-radius: 14px;
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  box-shadow: 0 0 18px rgba(79, 172, 254, 0.6);
+  background: linear-gradient(90deg, #60a5fa, #67e8f9);
+  border: none;
+  box-shadow: 0 12px 30px rgba(96, 165, 250, 0.4);
 }
 
 .login-btn:hover {
-  filter: brightness(1.1);
+  opacity: 0.95;
 }

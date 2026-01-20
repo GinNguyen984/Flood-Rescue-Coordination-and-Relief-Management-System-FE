@@ -22,7 +22,7 @@ import CoordinatorDispatch from "../pages/RescueCoordinator/MissionDispatch/Miss
 // import CoordinatorReports from "../pages/Coordinator/Reports";
 
 /* ================= RESCUE ================= */
-// import RescueTask from "../pages/Rescue/Task";
+import RescueTask from "../pages/RescueTeam/RescueMission/RescueMission";
 // import RescueHistory from "../pages/Rescue/History";
 // import RescueMessages from "../pages/Rescue/Messages";
 // import RescueProfile from "../pages/Rescue/Profile";
@@ -93,7 +93,7 @@ export default function AppRoutes() {
       </Route>
 
       {/* ================= RESCUE ================= */}
-      {/* <Route
+      <Route
         path="/rescue"
         element={
           <RequireAuth role="rescue">
@@ -102,10 +102,10 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<RescueTask />} />
-        <Route path="history" element={<RescueHistory />} />
+        {/* <Route path="history" element={<RescueHistory />} />
         <Route path="messages" element={<RescueMessages />} />
-        <Route path="profile" element={<RescueProfile />} />
-      </Route> */}
+        <Route path="profile" element={<RescueProfile />} /> */}
+      </Route>
 
       {/* ================= ROOT ================= */}
       <Route

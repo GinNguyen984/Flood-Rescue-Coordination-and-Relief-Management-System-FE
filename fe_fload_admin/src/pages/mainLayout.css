@@ -1,18 +1,47 @@
+/* ===== ROOT ===== */
 .main-layout {
     height: 100vh;
-    display: flex;
-    flex-direction: column;
+    overflow: hidden; /* KHÓA SCROLL TOÀN PAGE */
+    background: #f8fafc;
   }
   
+  /* ===== HEADER ===== */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    z-index: 1000;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  /* ===== BODY ===== */
   .main-body {
-    flex: 1;
     display: flex;
+    height: calc(100vh - 64px);
+    margin-top: 64px; /* chừa chỗ cho header */
   }
   
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 64px);
+    background: #0f172a;
+    overflow: hidden; /* sidebar KHÔNG SCROLL */
+  }
+  
+  /* ===== MAIN CONTENT ===== */
   .main-content {
-    flex: 1;
+    margin-left: 260px; /* chừa chỗ sidebar */
+    width: calc(100% - 260px);
+    height: calc(100vh - 64px);
     padding: 24px;
-    background: #f5f7fa;
-    overflow-y: auto;
+    overflow-y: auto; /* CHỈ CONTENT SCROLL */
+    background: #f8fafc;
   }
   

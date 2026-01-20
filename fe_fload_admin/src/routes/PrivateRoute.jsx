@@ -9,9 +9,20 @@ export default function RequireAuth({ children, role }) {
   }
 
   if (role && userRole !== role) {
-    return <Navigate to="/login" replace />;
+    const redirectByRole = {
+      admin: "/admin/user",
+      manager: "/manager",
+      coordinator: "/coordinator",
+      rescue: "/rescue",
+    };
+
+    return (
+      <Navigate
+        to={redirectByRole[userRole] || "/login"}
+        replace
+      />
+    );
   }
 
-  // 🔥 CỰC KỲ QUAN TRỌNG
   return children;
 }

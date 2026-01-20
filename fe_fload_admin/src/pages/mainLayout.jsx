@@ -4,16 +4,20 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import "./mainLayout.css";
 
 export default function MainLayout() {
-    return (
-      <div className="main-layout">
-        <Header />
-  
-        <div className="main-body">
-          <Sidebar />
-          <main className="main-content">
-            <Outlet />
-          </main>
-        </div>
+  return (
+    <div className="main-layout">
+      {/* FIXED HEADER */}
+      <Header />
+
+      <div className="main-body">
+        {/* FIXED SIDEBAR */}
+        <Sidebar />
+
+        {/* SCROLL CONTENT */}
+        <main className="main-content">
+          <Outlet />
+        </main>
       </div>
-    );
-  }
+    </div>
+  );
+}

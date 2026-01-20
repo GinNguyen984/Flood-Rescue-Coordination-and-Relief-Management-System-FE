@@ -1,0 +1,155 @@
+.emergency-page {
+    background: #f6f7fb;
+    padding: 80px 0;
+  }
+  
+  .emergency-container {
+    max-width: 1200px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+  }
+  
+  /* LEFT FORM */
+  .emergency-form {
+    background: #fff;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+  }
+  
+  .emergency-form h2 {
+    margin-bottom: 4px;
+  }
+  
+  .sub {
+    color: #6b7280;
+    margin-bottom: 24px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  
+  input, select, textarea {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  textarea {
+    resize: none;
+    height: 120px;
+  }
+  
+  /* LOCATION */
+  .location-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9fafb;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .btn-yellow {
+    background: #facc15;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    gap: 6px;
+  }
+  
+  /* UPLOAD */
+  .upload-box {
+    border: 2px dashed #ddd;
+    padding: 32px;
+    text-align: center;
+    border-radius: 12px;
+    color: #6b7280;
+    margin-bottom: 24px;
+  }
+  
+  /* SUBMIT */
+  .submit-btn {
+    width: 100%;
+    background: #facc15;
+    border: none;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  
+  /* RIGHT */
+  .emergency-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .help-box {
+    background: #ef4444;
+    color: #fff;
+    padding: 24px;
+    border-radius: 12px;
+  }
+  
+  .hotline {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 600;
+  }
+  
+  .red { background: #dc2626; }
+  .orange { background: #ea580c; }
+  .green { background: #16a34a; }
+  
+  .note-box, .stat-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+  }
+  
+  .note-box ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .note-box li {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .stat-box {
+    text-align: center;
+    background: #fefce8;
+  }
+  

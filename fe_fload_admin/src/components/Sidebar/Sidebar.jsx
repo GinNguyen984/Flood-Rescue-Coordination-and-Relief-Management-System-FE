@@ -70,11 +70,11 @@ const menuByRole = {
         path: "/manager/vehicles",
       },
       
-    {
-      label: "Thông tin",
-      icon: <InfoCircleOutlined />,
-      path: "/manager/info",
-    },
+    // {
+    //   label: "Thông tin",
+    //   icon: <InfoCircleOutlined />,
+    //   path: "/manager/info",
+    // },
     {
       label: "Kho hàng",
       icon: <InboxOutlined />,

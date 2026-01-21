@@ -1,0 +1,58 @@
+/* ===== HISTORY TOP ===== */
+.sidebar-top {
+    padding: 16px;
+    padding-top: 45px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  
+  /* INPUT TRA CỨU */
+  .history-input {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  
+  /* HISTORY CARD */
+  .history-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px;
+    margin-top: 10px;
+    border-left: 4px solid;
+  }
+  
+  .history-card.green {
+    border-color: #22c55e;
+  }
+  
+  .history-card.orange {
+    border-color: #f97316;
+  }
+  
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  
+  .time {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+  }
+  
+  .desc {
+    font-size: 13px;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  

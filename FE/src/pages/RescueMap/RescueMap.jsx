@@ -2,9 +2,8 @@ import {
   GoogleMap,
   LoadScript,
   Marker,
-  DirectionsRenderer,
 } from "@react-google-maps/api";
-import { useCallback, useState } from "react";
+import { useRef, useState } from "react";
 
 import MapHeader from "../../components/MapHeader/MapHeader";
 import RescueSidebar from "../../components/RescueSidebar/RescueSidebar";
@@ -20,111 +19,82 @@ const rescueTeams = [
   {
     id: 1,
     name: "Đội Phản ứng Nhanh Sài Gòn",
-    status: "free",
     position: { lat: 10.78, lng: 106.68 },
   },
   {
     id: 2,
     name: "Cứu hộ Thủy nạn Miền Nam",
-    status: "busy",
     position: { lat: 10.75, lng: 106.65 },
   },
 ];
 
 const RescueMap = () => {
+  const mapRef = useRef(null);
   const [userPos, setUserPos] = useState(null);
-  const [directions, setDirections] = useState(null);
 
-  /* ===== LẤY GPS USER ===== */
+  /* ===== GPS FREE ===== */
   const locateUser = () => {
+    if (!navigator.geolocation) {
+      alert("Trình duyệt không hỗ trợ GPS");
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserPos({
+        const position = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-        });
+        };
+
+        setUserPos(position);
+
+        if (mapRef.current) {
+          mapRef.current.panTo(position);
+          mapRef.current.setZoom(16);
+        }
       },
-      () => alert("Không lấy được vị trí GPS")
+      () => alert("Không lấy được vị trí GPS"),
+      { enableHighAccuracy: true }
     );
   };
-
-  /* ===== VẼ CHỈ ĐƯỜNG ===== */
-  const drawRoute = useCallback(
-    (destination) => {
-      if (!userPos) {
-        alert("Vui lòng bật GPS trước");
-        return;
-      }
-
-      const service = new window.google.maps.DirectionsService();
-
-      service.route(
-        {
-          origin: userPos,
-          destination,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-        },
-        (result, status) => {
-          if (status === "OK") {
-            setDirections(result);
-          } else {
-            alert("Không thể tìm đường");
-          }
-        }
-      );
-    },
-    [userPos]
-  );
 
   return (
     <div className="rescue-page">
       <MapHeader />
 
       <div className="map-layout">
-        {/* SIDEBAR */}
-        <RescueSidebar onDirection={drawRoute} />
+        <RescueSidebar />
 
-        {/* MAP */}
         <div className="map-wrapper">
-          <LoadScript
-            googleMapsApiKey="AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao"
-            libraries={["places"]}
-          >
+          <LoadScript googleMapsApiKey="AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao">
             <GoogleMap
               mapContainerStyle={{ width: "100%", height: "100%" }}
-              center={userPos || center}
+              center={center}
               zoom={13}
+              onLoad={(map) => (mapRef.current = map)}
             >
-              {/* USER MARKER */}
+              {/* USER */}
               {userPos && (
                 <Marker
                   position={userPos}
-                  label="📍"
+                  icon={{
+                    url:
+                      "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                  }}
                 />
               )}
 
-              {/* TEAM MARKER */}
+              {/* TEAMS */}
               {rescueTeams.map((team) => (
                 <Marker
                   key={team.id}
                   position={team.position}
-                  label={team.name}
-                  onClick={() => drawRoute(team.position)}
-                />
-              ))}
-
-              {/* ROUTE */}
-              {directions && (
-                <DirectionsRenderer
-                  directions={directions}
-                  options={{
-                    polylineOptions: {
-                      strokeColor: "#1d4ed8",
-                      strokeWeight: 5,
-                    },
+                  icon={{
+                    url:
+                      "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
                   }}
                 />
-              )}
+              ))}
             </GoogleMap>
           </LoadScript>
 

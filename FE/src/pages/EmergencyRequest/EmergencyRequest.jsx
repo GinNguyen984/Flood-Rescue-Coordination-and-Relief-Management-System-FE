@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import EmergencyHeader from "../../components/EmergencyHeader/EmergencyHeader";
 import EmergencyFooter from "../../components/EmergencyFooter/EmergencyFooter";
 
@@ -27,6 +28,8 @@ const EmergencyRequest = () => {
   const [gps, setGps] = useState(null);
   const [address, setAddress] = useState("");
   const [loadingGPS, setLoadingGPS] = useState(false);
+  const navigate = useNavigate();
+
   
 
   const GOOGLE_API_KEY = "AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao";
@@ -239,9 +242,14 @@ const EmergencyRequest = () => {
 </div>
 
 
-            <Button className="submit-btn" block>
-              GỬI YÊU CẦU CỨU TRỢ NGAY →
-            </Button>
+<Button
+  className="submit-btn"
+  block
+  onClick={() => navigate("/map")}
+>
+  GỬI YÊU CẦU CỨU TRỢ NGAY →
+</Button>
+
           </section>
 
           {/* ================= RIGHT ================= */}

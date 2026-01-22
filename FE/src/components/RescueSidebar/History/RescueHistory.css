@@ -1,31 +1,54 @@
-/* ===== HISTORY TOP ===== */
 .sidebar-top {
     padding: 16px;
-    padding-top: 45px;
-    background: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding-top: 76px;
+
   }
   
-  .title {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 10px;
+  /* TITLE */
+  .history-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
   }
   
-  /* INPUT TRA CỨU */
+  /* SEARCH */
   .history-input {
     display: flex;
     gap: 8px;
     margin-bottom: 12px;
   }
   
-  /* HISTORY CARD */
+  .history-input input {
+    height: 40px;
+    border-radius: 12px;
+  }
+  
+  .history-input button {
+    height: 40px;
+    border-radius: 12px;
+  }
+  
+  /* LIST TITLE */
+  .history-list-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-bottom: 6px;
+  }
+  
+  /* CARD */
   .history-card {
     background: #fff;
     border-radius: 14px;
     padding: 12px;
-    margin-top: 10px;
+    margin-bottom: 10px;
     border-left: 4px solid;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   }
   
   .history-card.green {
@@ -36,7 +59,8 @@
     border-color: #f97316;
   }
   
-  .history-header {
+  /* ROW */
+  .history-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -44,15 +68,40 @@
     font-weight: 600;
   }
   
+  /* TIME */
   .time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 12px;
-    color: #666;
-    margin-top: 2px;
+    color: #6b7280;
+    margin-top: 4px;
   }
   
+  /* DESC */
   .desc {
     font-size: 13px;
+    color: #111827;
     margin-top: 4px;
     line-height: 1.4;
+  }
+  
+  /* ACTION */
+  .history-action {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+  }
+  
+  /* MODAL */
+  .modal-form {
+    display: grid;
+    gap: 12px;
+  }
+  
+  .ant-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
   }
   

@@ -7,3 +7,10 @@
   border-right: 1px solid #eee;
   overflow: hidden;
 }
+.rescue-sidebar-header {
+  padding: 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #eee;
+  font-size: 18px;
+  font-weight: bold;
+}

@@ -1,0 +1,30 @@
+.permissions-page {
+  padding: 20px 22px;
+}
+
+.permissions-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.permissions-editor .ant-input {
+  font-family: monospace;
+}
+
+.matrix-box {
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+}
+
+.matrix-table { width: 100%; border-collapse: collapse; }
+.matrix-table th { text-align: left; padding: 10px; border-bottom: 1px solid #e6edf5; }
+.matrix-table td { padding: 12px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+.actions-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.action-item { display:flex; align-items:center; gap:6px; margin-right:6px; }
+.action-label { font-size: 13px; color:#374151 }
+

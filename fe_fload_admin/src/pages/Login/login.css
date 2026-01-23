@@ -1,0 +1,131 @@
+/* ===== PAGE ===== */
+.login-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #1f2937, #020617);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== CARD ===== */
+.login-card {
+  width: 440px;
+  background: linear-gradient(180deg, #020617, #020617);
+  border-radius: 26px;
+  padding: 48px 44px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+
+.login-card h1 {
+  font-size: 34px;
+  margin: 0;
+}
+
+.login-line {
+  width: 90px;
+  height: 4px;
+  background: linear-gradient(90deg, #60a5fa, #67e8f9);
+  border-radius: 999px;
+  margin: 14px 0 18px;
+}
+
+.login-desc {
+  color: #9ca3af;
+}
+
+/* ===== FORM ===== */
+.login-form {
+  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.05em;
+}
+
+/* ===== MUI INPUT OVERRIDE ===== */
+.MuiFilledInput-root {
+  height: 56px;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 14px;
+  color: #fff;
+}
+
+.MuiFilledInput-input {
+  padding: 18px 14px;
+  font-size: 15px;
+  color: #fff !important;
+}
+
+.MuiFilledInput-root:hover,
+.MuiFilledInput-root.Mui-focused {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.MuiFilledInput-root:before,
+.MuiFilledInput-root:after {
+  display: none;
+}
+
+/* icons */
+.MuiInputAdornment-root svg {
+  font-size: 20px;
+  color: #9ca3af;
+}
+
+.eye {
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.eye:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* autofill fix */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #020617 inset !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+/* ===== ERROR ===== */
+.error-text {
+  color: #f87171;
+  font-size: 13px;
+}
+
+/* ===== REMEMBER ===== */
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #d1d5db;
+}
+
+/* ===== BUTTON ===== */
+.login-btn {
+  height: 56px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(90deg, #60a5fa, #67e8f9);
+  border: none;
+  box-shadow: 0 14px 36px rgba(96, 165, 250, 0.45);
+}
+
+.login-btn:hover {
+  opacity: 0.95;
+}

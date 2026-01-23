@@ -14,7 +14,7 @@ const Header = () => {
 
         {/* CENTER - MENU */}
         <nav className="header-menu">
-          <a href="#">TRA CỨU</a>
+          <a href="/map">TRA CỨU</a>
           <a href="#">CẨM NANG</a>
           <a href="#">LIÊN HỆ</a>
           <Link to="/map">BẢN ĐỒ</Link>

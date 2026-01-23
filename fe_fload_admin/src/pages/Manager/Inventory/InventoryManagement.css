@@ -263,4 +263,37 @@
     color: #0ea5e9;
     font-weight: 600;
   }
-  
+  /* Bọc cuộn ngang */
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Header + row cùng độ rộng */
+.table-head.wide,
+.table-row.wide {
+  min-width: 1100px;
+  display: grid;
+  grid-template-columns:
+    120px   /* Mã */
+    260px   /* Tên */
+    120px   /* Kho */
+    200px   /* Tồn kho */
+    100px   /* Đơn vị */
+    160px   /* Danh mục */
+    140px   /* Trạng thái */
+    120px;  /* Thao tác */
+}
+
+/* Scrollbar đẹp */
+.table-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+  background: #c7d2fe;
+  border-radius: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}

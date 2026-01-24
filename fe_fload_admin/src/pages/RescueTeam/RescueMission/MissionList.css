@@ -1,7 +1,7 @@
 /* ===== CONTAINER ===== */
 .mission-list {
-    background: linear-gradient(180deg, #0b1f2a, #020617);
-    border-radius: 20px;
+    background: rgb(125, 172, 172);
+    border-radius: 1px;
     padding: 16px;
     color: #e5e7eb;
     height: 100%;

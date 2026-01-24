@@ -17,9 +17,9 @@ import ManagerRescueTeam from "../pages/Manager/RescueTeamManagement/RescueTeamM
 
 /* ================= COORDINATOR ================= */
 import CoordinatorDispatch from "../pages/RescueCoordinator/MissionDispatch/MissionDispatch";
-// import CoordinatorMap from "../pages/Coordinator/Map";
-// import CoordinatorResources from "../pages/Coordinator/Resources";
-// import CoordinatorReports from "../pages/Coordinator/Reports";
+import DispatchMapPage from "../pages/RescueCoordinator/DispatchMapPage/DispatchMapPage";
+import RescueOperationLayout from "../pages/RescueCoordinator/RescueOperationLayout/RescueOperationLayout";
+import RescueReportPage from "../pages/RescueCoordinator/RescueReportPage/RescueReportPage";
 
 /* ================= RESCUE ================= */
 import RescueTask from "../pages/RescueTeam/RescueMission/RescueMission";
@@ -86,8 +86,12 @@ export default function AppRoutes() {
         }
       >
       <Route index element={<CoordinatorDispatch />} />
+      <Route path="dang" element={< DispatchMapPage/>} />
+      <Route path="mina" element={<RescueOperationLayout />} />
+      <Route path="reports" element={<RescueReportPage />} />
+
         {/* <Route index element={<CoordinatorDispatch />} />
-        <Route path="map" element={<CoordinatorMap />} />
+      
         <Route path="resources" element={<CoordinatorResources />} />
         <Route path="reports" element={<CoordinatorReports />} /> */}
       </Route>

@@ -1,4 +1,5 @@
-import "./MissionList.css";
+import "./MissionListRescue.css";
+import { useNavigate } from "react-router-dom";
 
 const missions = [
   {
@@ -35,6 +36,8 @@ const missions = [
 ];
 
 export default function MissionList() {
+
+  const navigate = useNavigate();
   return (
     <section className="rm-mission-list">
       {/* HEADER */}
@@ -97,9 +100,14 @@ export default function MissionList() {
               <button className="rm-btn-accept">
                 ✓ CHẤP NHẬN NHIỆM VỤ
               </button>
-              <button className="rm-btn-detail">
-                XEM CHI TIẾT →
-              </button>
+              <button
+  className="rm-btn-detail"
+  onClick={() =>
+    navigate(`/rescue/mission/${m.id.replace("#", "")}`)
+  }
+>
+  XEM CHI TIẾT →
+</button>
             </div>
           </div>
         </div>

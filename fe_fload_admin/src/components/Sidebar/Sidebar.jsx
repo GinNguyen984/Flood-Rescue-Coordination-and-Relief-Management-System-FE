@@ -131,6 +131,11 @@ const menuByRole = {
       end: true,
     },
     {
+      label: "Đang Cứu Hộ",
+      icon: <GlobalOutlined />,
+      path: "/rescue/dangcuho",
+    },
+    {
       label: "Lịch sử",
       icon: <HistoryOutlined />,
       path: "/rescue/history",

@@ -1,0 +1,101 @@
+.rp-root {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(ellipse at top right,#2a1e0f,#0c0702);
+    color: #fff;
+  }
+  
+  /* HEADER */
+  .rp-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .rp-header h2 span { color: #f59e0b; margin-left: 8px; }
+  .rp-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #22c55e; display: inline-block; margin-right: 6px;
+  }
+  .rp-header-right {
+    display: flex; gap: 16px; align-items: center;
+  }
+  .rp-badge-danger {
+    background: #7f1d1d;
+    padding: 6px 14px;
+    border-radius: 999px;
+    color: #fecaca;
+  }
+  
+  /* MAIN */
+  .rp-main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 16px;
+    padding: 16px 24px;
+  }
+  
+  /* LEFT */
+  .rp-left { display: flex; flex-direction: column; gap: 12px; }
+  .rp-card {
+    background: #1a1209;
+    padding: 14px;
+    border-radius: 16px;
+  }
+  .rp-call {
+    margin-top: 8px;
+    background: #b45309;
+    border: none;
+    padding: 10px;
+    border-radius: 999px;
+    color: #fff;
+  }
+  
+  /* MAP */
+  .rp-map iframe {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    border: none;
+  }
+  
+  /* PROGRESS */
+  .rp-progress {
+    display: flex;
+    justify-content: space-around;
+    padding: 14px 24px;
+    background: rgba(0,0,0,.3);
+  }
+  .rp-progress .done { color: #22c55e; }
+  .rp-progress .active {
+    color: #22c55e;
+    font-weight: 700;
+  }
+  
+  /* FOOTER */
+  .rp-footer {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 24px;
+    background: linear-gradient(to top,rgba(12,7,2,.95),rgba(12,7,2,.6));
+  }
+  .rp-help {
+    background: transparent;
+    border: 1px solid #6b7280;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 999px;
+  }
+  .rp-done {
+    background: #16a34a;
+    border: none;
+    color: #052e16;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  

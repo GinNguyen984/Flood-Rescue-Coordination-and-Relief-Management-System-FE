@@ -89,11 +89,6 @@ export default function AppRoutes() {
       <Route path="dang" element={< DispatchMapPage/>} />
       <Route path="mina" element={<RescueOperationLayout />} />
       <Route path="reports" element={<RescueReportPage />} />
-
-        {/* <Route index element={<CoordinatorDispatch />} />
-      
-        <Route path="resources" element={<CoordinatorResources />} />
-        <Route path="reports" element={<CoordinatorReports />} /> */}
       </Route>
 
       {/* ================= RESCUE ================= */}

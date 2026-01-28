@@ -10,6 +10,10 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
   }
+
+  .stat-grid > div {
+    cursor: pointer;
+  }
   
   .stat-card {
     border-radius: 14px;
@@ -231,3 +235,21 @@
     color: #64748b;
   }
   
+  /* ===== DRAWER CONTENT ===== */
+  .drawer-content {
+    padding: 12px 0;
+  }
+  
+  .drawer-content p {
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .stat-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .chart-grid {
+      grid-template-columns: 1fr;
+    }
+  }

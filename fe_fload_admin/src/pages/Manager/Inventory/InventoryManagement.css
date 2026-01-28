@@ -263,6 +263,48 @@
     color: #0ea5e9;
     font-weight: 600;
   }
+
+  /* ================= DRAWER CONTENT ================= */
+  .drawer-detail {
+    padding: 8px 0;
+  }
+
+  .drawer-detail h4 {
+    margin: 16px 0 12px 0;
+    font-size: 14px;
+    color: #1f2937;
+    font-weight: 600;
+  }
+
+  /* ================= PURCHASE FORM ================= */
+  .purchase-form {
+    padding: 8px 0;
+  }
+
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 8px;
+    background: #fafafa;
+  }
+
+  .cart-item strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  
   /* Bọc cuộn ngang */
 .table-scroll {
   overflow-x: auto;

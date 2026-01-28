@@ -47,12 +47,21 @@
       0 10px 30px rgba(15, 23, 42, 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.6);
     transition: all 0.25s ease;
+    cursor: pointer;
   }
   
   .stat-card:hover {
     transform: translateY(-4px);
     box-shadow:
       0 18px 48px rgba(15, 23, 42, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .stat-card.active {
+    background: linear-gradient(180deg, #eff6ff, #f0f9ff);
+    border: 2px solid #0284c7;
+    box-shadow:
+      0 10px 30px rgba(2, 132, 199, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.6);
   }
   
@@ -152,6 +161,7 @@
     padding: 16px 0;
     border-top: 1px solid #f1f5f9;
     transition: background 0.2s ease;
+    cursor: pointer;
   }
   
   .table-row:hover {
@@ -263,4 +273,68 @@
     color: #c2410c;
     box-shadow: inset 0 0 0 1px #fdba74;
   }
+
+/* ================= DRAWER CONTENT ================= */
+.team-detail {
+  padding: 8px 0;
+}
+
+.team-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.overview-stat {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.stat-value.green {
+  color: #059669;
+}
+
+.stat-value.orange {
+  color: #d97706;
+}
+
+.member-stats {
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.stat-progress {
+  margin: 0;
+}
+
+.members-section {
+  margin-top: 20px;
+}
+
+.members-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
   

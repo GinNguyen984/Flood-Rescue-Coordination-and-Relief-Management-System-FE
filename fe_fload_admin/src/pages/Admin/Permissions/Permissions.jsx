@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Checkbox, Input, message, Space } from "antd";
+import { Button, Checkbox, Input, message, Space, Tabs } from "antd";
 import "./Permissions.css";
 
 const ROLES = ["admin", "manager", "coordinator", "rescue"];
@@ -58,6 +58,7 @@ function pushLog(entry) {
 export default function Permissions() {
   const [matrix, setMatrix] = useState(() => readRoleMatrix());
   const [username, setUsername] = useState("");
+  const [activeRole, setActiveRole] = useState("admin");
   const [userOverrides, setUserOverrides] = useState(() => {
     try {
       const raw = localStorage.getItem("user_permissions");
@@ -114,62 +115,91 @@ export default function Permissions() {
 
   const featureRows = useMemo(() => FEATURES, []);
 
+  const tabItems = ROLES.map((role) => ({
+    key: role,
+    label: role.charAt(0).toUpperCase() + role.slice(1),
+    children: (
+      <div className="role-permissions">
+        <div className="permissions-list">
+          {featureRows.map((feature) => (
+            <div key={feature.id} className="permission-item">
+              <div className="permission-header">
+                <div className="permission-label">
+                  <h4>{feature.name}</h4>
+                  <p className="permission-feature-id">{feature.id}</p>
+                </div>
+              </div>
+              <div className="permission-actions">
+                <div className="actions-row">
+                  {feature.actions.map((action) => {
+                    const checked = (matrix[role] && matrix[role][feature.id] || []).includes(action);
+                    return (
+                      <label className="action-item" key={action}>
+                        <Checkbox
+                          checked={checked}
+                          onChange={(e) => handleToggle(role, feature.id, action, e.target.checked)}
+                        />
+                        <span className="action-label">{action}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="permission-action">
+                <Button
+                  type="text"
+                  size="small"
+                  onClick={handleSaveMatrix}
+                  className="save-btn"
+                >
+                  Lưu
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  }));
+
   return (
     <div className="permissions-page">
       <div className="page-header">
         <div>
-          <h2>Phân quyền nâng cao</h2>
-          <p>Quản lý chi tiết quyền theo role, chức năng và hành động. Hỗ trợ override cho user cụ thể.</p>
-        </div>
-
-        <div className="page-actions">
-          <Space>
-            <Input placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} style={{ width: 160 }} />
-            <Button onClick={handleLoadUser}>Load user</Button>
-            <Button onClick={handleSaveUserOverride}>Save override</Button>
-            <Button type="primary" onClick={handleSaveMatrix}>
-              Lưu ma trận
-            </Button>
-          </Space>
+          <h2>Quản lý Phân quyền</h2>
+          <p>Cấu hình chi tiết quyền hạn theo role, chức năng và hành động</p>
         </div>
       </div>
 
-      <div className="matrix-box">
-        <table className="matrix-table">
-          <thead>
-            <tr>
-              <th>Chức năng / Hành động</th>
-              {ROLES.map((r) => (
-                <th key={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {featureRows.map((f) => (
-              <tr key={f.id}>
-                <td>
-                  <strong>{f.name}</strong>
-                  <div className="param-desc">{f.id}</div>
-                </td>
-                {ROLES.map((role) => (
-                  <td key={role}>
-                    <div className="actions-row">
-                      {f.actions.map((act) => {
-                        const checked = (matrix[role] && matrix[role][f.id] || []).includes(act);
-                        return (
-                          <label className="action-item" key={act}>
-                            <Checkbox checked={checked} onChange={(e) => handleToggle(role, f.id, act, e.target.checked)} />
-                            <span className="action-label">{act}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="permissions-container">
+        <div className="user-override-section">
+          <div className="override-header">
+            <h3>Quyền đặc biệt cho User</h3>
+            <div className="override-actions">
+              <Space>
+                <Input
+                  placeholder="Nhập username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  style={{ width: 200 }}
+                />
+                <Button onClick={handleLoadUser}>Tải quyền</Button>
+                <Button onClick={handleSaveUserOverride} type="default">
+                  Lưu đặc biệt
+                </Button>
+              </Space>
+            </div>
+          </div>
+        </div>
+
+        <div className="matrix-box">
+          <Tabs
+            activeKey={activeRole}
+            onChange={setActiveRole}
+            items={tabItems}
+            className="permissions-tabs"
+          />
+        </div>
       </div>
     </div>
   );

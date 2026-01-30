@@ -13,7 +13,7 @@ import "./login.css";
 export default function Login() {
   const [show, setShow] = useState(false);
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("123456");
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 

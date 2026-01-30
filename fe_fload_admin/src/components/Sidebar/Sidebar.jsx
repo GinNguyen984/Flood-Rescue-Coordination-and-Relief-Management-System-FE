@@ -23,9 +23,9 @@ import {
   UserOutlined,
 
   /* COORDINATOR */
-  DeploymentUnitOutlined,
+  CheckCircleOutlined,
   GlobalOutlined,
-  DatabaseOutlined,
+  AimOutlined,
   BarChartOutlined,
 } from "@ant-design/icons";
 import "./Sidebar.css";
@@ -93,27 +93,32 @@ const menuByRole = {
   ],
 
   /* ================= COORDINATOR ================= */
-  coordinator: [
+  coordinator : [
     {
-      label: "Điều phối",
-      icon: <DeploymentUnitOutlined />,
+      label: "Xác Minh Yêu Cầu",
+      icon: <CheckCircleOutlined />,
       path: "/coordinator",
       end: true,
     },
     {
-      label: "Giám sát bản đồ",
+      label: "Đang Điều Phối",
       icon: <GlobalOutlined />,
-      path: "/coordinator/map",
+      path: "/coordinator/dang",
     },
     {
-      label: "Tài nguyên",
-      icon: <DatabaseOutlined />,
-      path: "/coordinator/resources",
+      label: "Đang Cứu Hộ",
+      icon: <AimOutlined />,
+      path: "/coordinator/mina",
     },
     {
-      label: "Báo cáo",
+      label: "Hoàn Thành & Báo Cáo",
       icon: <BarChartOutlined />,
       path: "/coordinator/reports",
+    },
+    {
+      label: "Tài Nguyên",
+      icon: <AppstoreOutlined />,
+      path: "/coordinator/resources",
     },
   ],
 
@@ -124,6 +129,11 @@ const menuByRole = {
       icon: <CarryOutOutlined />,
       path: "/rescue",
       end: true,
+    },
+    {
+      label: "Đang Cứu Hộ",
+      icon: <GlobalOutlined />,
+      path: "/rescue/dangcuho",
     },
     {
       label: "Lịch sử",

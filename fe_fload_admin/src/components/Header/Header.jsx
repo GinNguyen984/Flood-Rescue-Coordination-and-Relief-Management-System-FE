@@ -1,6 +1,10 @@
 import { Input, Badge } from "antd";
-import { BellOutlined, QuestionCircleOutlined } from "@ant-design/icons";
-import "./Header.css";
+import {
+  BellOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
+
+import "./rc-hd.header.css";
 
 export default function Header() {
   const role = localStorage.getItem("role") || "admin";
@@ -31,29 +35,36 @@ export default function Header() {
   const currentRole = roleInfo[role] || roleInfo.admin;
 
   return (
-    <header className="header">
-      {/* LEFT: Logo + Title */}
-      <div className="header-left">
-        <div className="logo-icon">{currentRole.icon}</div>
-        <div className="logo-text">
+    <header className="rc-hd">
+      {/* ===== LEFT ===== */}
+      <div className="rc-hd__left">
+        <div className="rc-hd__logo-icon">
+          {currentRole.icon}
+        </div>
+
+        <div className="rc-hd__logo-text">
           <h3>{currentRole.title}</h3>
           <span>{currentRole.subtitle}</span>
         </div>
       </div>
 
-      {/* CENTER: Search */}
+      {/* ===== CENTER ===== */}
       <Input.Search
         placeholder="Tìm kiếm người dùng theo tên, email, ID..."
-        className="header-search"
+        className="rc-hd__search"
       />
 
-      {/* RIGHT: Actions */}
-      <div className="header-actions">
+      {/* ===== RIGHT ===== */}
+      <div className="rc-hd__actions">
         <Badge dot>
-          <BellOutlined className="header-icon" />
+          <BellOutlined className="rc-hd__icon" />
         </Badge>
-        <QuestionCircleOutlined className="header-icon" />
-        <span className="lang">LANGUAGE: VN</span>
+
+        <QuestionCircleOutlined className="rc-hd__icon" />
+
+        <span className="rc-hd__lang">
+          LANGUAGE: VN
+        </span>
       </div>
     </header>
   );

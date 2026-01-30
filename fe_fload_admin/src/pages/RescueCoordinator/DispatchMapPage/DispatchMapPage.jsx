@@ -1,18 +1,18 @@
 import ListTeamRescue from "../../../components/RescueCoordinatorComponents/ListTeamRescue/ListTeamRescue";
 import DispatchMapView from "../../../components/RescueCoordinatorComponents/DispatchMap/DispatchMapView";
 
-import "./rc-dispatch-layout.css";
+import "./dispatch-map-layout.css";
 
 export default function DispatchMapPage() {
   return (
-    <div className="rc-dispatch">
+    <div className="rcd-layout">
       {/* LEFT */}
-      <aside className="rc-dispatch__sidebar">
+      <aside className="rcd-layout__sidebar">
         <ListTeamRescue />
       </aside>
 
       {/* RIGHT */}
-      <main className="rc-dispatch__main">
+      <main className="rcd-layout__main">
         <DispatchMapView />
       </main>
     </div>

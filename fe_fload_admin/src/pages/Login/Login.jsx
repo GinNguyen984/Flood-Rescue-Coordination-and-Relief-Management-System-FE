@@ -1,29 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextField, InputAdornment } from "@mui/material";
 import {
-  MailOutline,
+  PhoneAndroid,
   LockOutlined,
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
-import { Button, Checkbox } from "antd";
+import { Button } from "antd";
+import { loginApi } from "../../../api/axios/authApi";
 import "./login.css";
 
 export default function Login() {
   const [show, setShow] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("123456");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // DEMO ACCOUNT
-  const accounts = [
-    { username: "admin", password: "123456", role: "admin" },
-    { username: "manager", password: "123456", role: "manager" },
-    { username: "coordinator", password: "123456", role: "coordinator" },
-    { username: "rescue", password: "123456", role: "rescue" },
-  ];
+  // 👉 đảm bảo form luôn trắng khi vào trang
+  useEffect(() => {
+    setPhone("");
+    setPassword("");
+  }, []);
 
   const redirectByRole = {
     admin: "/admin",
@@ -32,104 +31,93 @@ export default function Login() {
     rescue: "/rescue",
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     let newErrors = {};
-    if (!username) newErrors.username = "Vui lòng nhập tài khoản";
+    if (!phone) newErrors.phone = "Vui lòng nhập số điện thoại";
     if (!password) newErrors.password = "Vui lòng nhập mật khẩu";
     setErrors(newErrors);
     if (Object.keys(newErrors).length) return;
 
-    const user = accounts.find(
-      (u) => u.username === username && u.password === password
-    );
+    try {
+      const res = await loginApi({ phone, password });
+      const { token, role } = res.data;
 
-    if (!user) {
-      setErrors({ password: "Tài khoản hoặc mật khẩu không đúng" });
-      return;
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+      localStorage.setItem("isAuth", "true");
+
+      navigate(redirectByRole[role] || "/", { replace: true });
+    } catch (err) {
+      setErrors({
+        password:
+          err.response?.data?.message ||
+          "Số điện thoại hoặc mật khẩu không đúng",
+      });
     }
-
-    localStorage.setItem("isAuth", "true");
-    localStorage.setItem("role", user.role);
-
-    navigate(redirectByRole[user.role], { replace: true });
   };
 
   return (
     <div className="login-page">
       <div className="login-card">
         <h1>Đăng nhập</h1>
-        <div className="login-line" />
-        <p className="login-desc">
-          Truy cập hệ thống quản trị vận hành cao cấp
-        </p>
 
         <div className="login-form">
-          {/* USERNAME */}
-          <div className="form-group">
-            <label className="login-label">TÀI KHOẢN NỘI BỘ</label>
-            <TextField
-              fullWidth
-              variant="filled"
-              placeholder="Email hoặc ID nhân sự"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              error={!!errors.username}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MailOutline />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {errors.username && (
-              <span className="error-text">{errors.username}</span>
-            )}
-          </div>
+          {/* PHONE */}
+          <TextField
+            fullWidth
+            variant="filled"
+            placeholder="Số điện thoại"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            error={!!errors.phone}
+            autoComplete="off"
+            name="phone"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PhoneAndroid />
+                </InputAdornment>
+              ),
+            }}
+          />
 
           {/* PASSWORD */}
-          <div className="form-group">
-            <label className="login-label">MẬT KHẨU HỆ THỐNG</label>
-            <TextField
-              fullWidth
-              variant="filled"
-              type={show ? "text" : "password"}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={!!errors.password}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOutlined />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment
-                    position="end"
-                    className="eye"
-                    onClick={() => setShow(!show)}
-                  >
-                    {show ? <VisibilityOff /> : <Visibility />}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {errors.password && (
-              <span className="error-text">{errors.password}</span>
-            )}
-          </div>
+          <TextField
+            fullWidth
+            variant="filled"
+            type={show ? "text" : "password"}
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={!!errors.password}
+            autoComplete="new-password"
+            name="password"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockOutlined />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  onClick={() => setShow(!show)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {show ? <VisibilityOff /> : <Visibility />}
+                </InputAdornment>
+              ),
+            }}
+          />
 
-          {/* REMEMBER */}
-          <div className="remember">
-            <Checkbox /> <span>Ghi nhớ phiên làm việc</span>
-          </div>
+          {errors.password && (
+            <span className="error-text">{errors.password}</span>
+          )}
 
-          {/* BUTTON */}
           <Button
             type="primary"
-            size="large"
             block
+            size="large"
             className="login-btn"
             onClick={handleLogin}
           >

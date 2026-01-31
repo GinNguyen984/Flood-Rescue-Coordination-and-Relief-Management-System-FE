@@ -27,9 +27,9 @@ import "./userManagement.css";
 export default function UserManagement() {
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
-  const [editingUser, setEditingUser] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
 
   const [users, setUsers] = useState([
     {
@@ -57,8 +57,8 @@ export default function UserManagement() {
       role: "COORDINATOR",
       roleColor: "purple",
       area: "TP.HCM - TTĐP",
-      status: "Hoạt động",
-      statusColor: "green",
+      status: "Nghỉ phép",
+      statusColor: "orange",
       last: "2 giờ trước",
       joinDate: "20/03/2023",
       department: "Phòng Điều Phối",
@@ -72,30 +72,23 @@ export default function UserManagement() {
     "RESCUE TEAM": "blue",
     COORDINATOR: "purple",
     MANAGER: "gold",
+    ADMIN: "red",
   };
 
   const statusColorMap = {
     "Hoạt động": "green",
+    "Nghỉ phép": "orange",
     Khóa: "red",
   };
 
-  /* ================= HANDLERS ================= */
-
-  const handleCreateUser = () => {
+  const handleSubmitUser = () => {
     form.validateFields().then((values) => {
-      if (editingUser) {
-        const updatedUsers = users.map((u) =>
-          u.id === editingUser.id
-            ? {
-                ...u,
-                ...values,
-                roleColor: roleColorMap[values.role],
-                statusColor: statusColorMap[values.status],
-                last: "Vừa cập nhật",
-              }
-            : u
+      if (isEdit && selectedUser) {
+        setUsers(
+          users.map((u) =>
+            u.id === selectedUser.id ? { ...u, ...values } : u
+          )
         );
-        setUsers(updatedUsers);
       } else {
         const newUser = {
           id: Date.now(),
@@ -103,38 +96,16 @@ export default function UserManagement() {
           roleColor: roleColorMap[values.role],
           statusColor: statusColorMap[values.status],
           last: "Vừa xong",
-          joinDate: new Date().toLocaleDateString("vi-VN"),
         };
         setUsers([newUser, ...users]);
       }
 
       setOpen(false);
-      setEditingUser(null);
+      setIsEdit(false);
+      setSelectedUser(null);
       form.resetFields();
     });
   };
-
-  const handleEditUser = (user) => {
-    setEditingUser(user);
-    setOpen(true);
-    form.setFieldsValue(user);
-  };
-
-  const handleDeleteUser = (id) => {
-    setUsers(users.filter((u) => u.id !== id));
-  };
-
-  const handleLockUser = (id) => {
-    setUsers(
-      users.map((u) =>
-        u.id === id
-          ? { ...u, status: "Khóa", statusColor: "red" }
-          : u
-      )
-    );
-  };
-
-  /* ================= UI ================= */
 
   return (
     <div className="user-page">
@@ -142,7 +113,7 @@ export default function UserManagement() {
       <div className="page-header">
         <div>
           <h2>Danh sách người dùng</h2>
-          <p>Quản lý thành viên và phân quyền hệ thống cứu hộ.</p>
+          <p>Quản lý thành viên, phân quyền và bảo mật hệ thống cứu hộ tập trung.</p>
         </div>
 
         <div className="page-actions">
@@ -151,8 +122,8 @@ export default function UserManagement() {
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => {
-              setEditingUser(null);
-              form.resetFields();
+              setIsEdit(false);
+              setSelectedUser(null);
               setOpen(true);
             }}
           >
@@ -166,22 +137,30 @@ export default function UserManagement() {
         <StatCard
           title="TỔNG NGƯỜI DÙNG"
           value={users.length}
+          note="Tổng hệ thống"
           icon={<TeamOutlined />}
+          color="teal"
         />
         <StatCard
           title="RESCUE TEAM"
           value={users.filter((u) => u.role === "RESCUE TEAM").length}
+          note="Nhân sự thực địa"
           icon={<ThunderboltOutlined />}
+          color="orange"
         />
         <StatCard
           title="ĐANG HOẠT ĐỘNG"
           value={users.filter((u) => u.status === "Hoạt động").length}
+          note="Online"
           icon={<CheckCircleOutlined />}
+          color="green"
         />
         <StatCard
           title="ĐANG CHỜ DUYỆT"
-          value={0}
+          value="0"
+          note="Không có"
           icon={<ClockCircleOutlined />}
+          color="yellow"
         />
       </div>
 
@@ -190,7 +169,9 @@ export default function UserManagement() {
         <table>
           <thead>
             <tr>
-              <th><Checkbox /></th>
+              <th className="col-checkbox">
+                <Checkbox />
+              </th>
               <th>NGƯỜI DÙNG</th>
               <th>VAI TRÒ</th>
               <th>KHU VỰC</th>
@@ -205,13 +186,16 @@ export default function UserManagement() {
               <UserRow
                 key={u.id}
                 {...u}
-                onSelect={() => {
+                onView={() => {
                   setSelectedUser(u);
                   setDrawerVisible(true);
                 }}
-                onEdit={() => handleEditUser(u)}
-                onDelete={() => handleDeleteUser(u.id)}
-                onLock={() => handleLockUser(u.id)}
+                onEdit={() => {
+                  setSelectedUser(u);
+                  setIsEdit(true);
+                  form.setFieldsValue(u);
+                  setOpen(true);
+                }}
               />
             ))}
           </tbody>
@@ -225,76 +209,119 @@ export default function UserManagement() {
 
       {/* DRAWER */}
       <Drawer
-        title={selectedUser?.name}
+        title={selectedUser ? `👤 ${selectedUser.name}` : "Chi tiết người dùng"}
+        placement="right"
+        onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         width={600}
-        onClose={() => setDrawerVisible(false)}
       >
-        {selectedUser && (
-          <UserDetail
-            user={selectedUser}
-            onEdit={() => {
-              setDrawerVisible(false);
-              handleEditUser(selectedUser);
-            }}
-          />
-        )}
+        {selectedUser && <UserDetail user={selectedUser} />}
       </Drawer>
 
       {/* MODAL */}
       <Modal
-        title={editingUser ? "Chỉnh sửa người dùng" : "Tạo người dùng mới"}
+        title={isEdit ? "Chỉnh sửa người dùng" : "Tạo người dùng mới"}
         open={open}
-        onCancel={() => setOpen(false)}
-        onOk={handleCreateUser}
-        okText={editingUser ? "Cập nhật" : "Tạo"}
+        onCancel={() => {
+          setOpen(false);
+          setIsEdit(false);
+          form.resetFields();
+        }}
+        onOk={handleSubmitUser}
+        okText={isEdit ? "Lưu thay đổi" : "Tạo người dùng"}
+        cancelText="Hủy"
         width={700}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Họ tên" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
 
-          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { required: true },
+                { type: "email", message: "Email không hợp lệ" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item name="phone" label="Điện thoại">
-            <Input />
-          </Form.Item>
+            <Form.Item
+              label="Điện thoại"
+              name="phone"
+              rules={[
+                { required: true },
+                {
+                  pattern: /^0\d{9}$/,
+                  message: "SĐT phải 10 số, bắt đầu bằng 0",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item name="role" label="Vai trò" rules={[{ required: true }]}>
-            <Select>
-              <Select.Option value="RESCUE TEAM">Rescue Team</Select.Option>
-              <Select.Option value="COORDINATOR">Coordinator</Select.Option>
-              <Select.Option value="MANAGER">Manager</Select.Option>
-            </Select>
-          </Form.Item>
+            <Form.Item label="Địa chỉ" name="address">
+              <Input />
+            </Form.Item>
 
-          <Form.Item name="area" label="Khu vực">
-            <Input />
-          </Form.Item>
+            <Form.Item label="Vai trò" name="role" rules={[{ required: true }]}>
+              <Select>
+                <Select.Option value="RESCUE TEAM">Rescue Team</Select.Option>
+                <Select.Option value="COORDINATOR">Coordinator</Select.Option>
+                <Select.Option value="MANAGER">Manager</Select.Option>
+                <Select.Option value="ADMIN">Admin</Select.Option>
+              </Select>
+            </Form.Item>
 
-          <Form.Item name="status" label="Trạng thái">
-            <Select>
-              <Select.Option value="Hoạt động">Hoạt động</Select.Option>
-              <Select.Option value="Khóa">Khóa</Select.Option>
-            </Select>
-          </Form.Item>
+            <Form.Item
+              label="Bộ phận / Đội"
+              name="department"
+              rules={[{ required: true }]}
+            >
+              <Select>
+                <Select.Option value="Đội Cứu Hộ 1">Đội Cứu Hộ 1</Select.Option>
+                <Select.Option value="Đội Cứu Hộ 2">Đội Cứu Hộ 2</Select.Option>
+                <Select.Option value="Phòng Điều Phối">Phòng Điều Phối</Select.Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item label="Khu vực" name="area" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+
+            <Form.Item label="Trạng thái" name="status">
+              <Select>
+                <Select.Option value="Hoạt động">Hoạt động</Select.Option>
+                <Select.Option value="Khóa">Khóa</Select.Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label="Mật khẩu"
+              name="password"
+              rules={[{ required: true, min: 6 }]}
+            >
+              <Input />
+            </Form.Item>
+          </div>
         </Form>
       </Modal>
     </div>
   );
 }
 
-/* ================= COMPONENTS ================= */
+/* ================= COMPONENT ================= */
 
-function StatCard({ title, value, icon }) {
+function StatCard({ title, value, note, icon, color }) {
   return (
     <div className="stat-card">
-      <div className="stat-icon">{icon}</div>
+      <div className={`stat-icon ${color}`}>{icon}</div>
       <p>{title}</p>
       <h3>{value}</h3>
+      <span>{note}</span>
     </div>
   );
 }
@@ -308,40 +335,49 @@ function UserRow({
   status,
   statusColor,
   last,
-  onSelect,
+  onView,
   onEdit,
-  onDelete,
-  onLock,
 }) {
   return (
-    <tr onClick={onSelect}>
-      <td><Checkbox /></td>
+    <tr onClick={onView} style={{ cursor: "pointer" }}>
+      <td>
+        <Checkbox />
+      </td>
       <td>
         <strong>{name}</strong>
         <p>{email}</p>
       </td>
-      <td><Tag color={roleColor}>{role}</Tag></td>
+      <td>
+        <Tag color={roleColor}>{role}</Tag>
+      </td>
       <td>{area}</td>
-      <td><span className={`status ${statusColor}`}>{status}</span></td>
+      <td>
+        <span className={`status ${statusColor}`}>{status}</span>
+      </td>
       <td>{last}</td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <LockOutlined onClick={onLock} />
-        <EditOutlined onClick={onEdit} />
-        <DeleteOutlined onClick={onDelete} />
+      <td>
+        <EditOutlined
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+        />
       </td>
     </tr>
   );
 }
 
-function UserDetail({ user, onEdit }) {
+function UserDetail({ user }) {
   return (
-    <>
-      <p><b>Email:</b> {user.email}</p>
-      <p><b>Điện thoại:</b> {user.phone}</p>
-      <p><b>Khu vực:</b> {user.area}</p>
-      <Button type="primary" block onClick={onEdit}>
-        Chỉnh sửa thông tin
-      </Button>
-    </>
+    <div>
+      <h3>{user.name}</h3>
+      <p>Email: {user.email}</p>
+      <p>Điện thoại: {user.phone}</p>
+      <p>Địa chỉ: {user.address}</p>
+      <p>Vai trò: {user.role}</p>
+      <p>Bộ phận: {user.department}</p>
+      <p>Khu vực: {user.area}</p>
+      <p>Trạng thái: {user.status}</p>
+    </div>
   );
 }

@@ -3,8 +3,6 @@ import {
   Button,
   Tag,
   Checkbox,
-  Pagination,
-  Tooltip,
   Modal,
   Form,
   Input,
@@ -13,22 +11,33 @@ import {
   Divider,
 } from "antd";
 import {
-  DownloadOutlined,
   PlusOutlined,
   TeamOutlined,
   ThunderboltOutlined,
   CheckCircleOutlined,
-  ClockCircleOutlined,
   EditOutlined,
 } from "@ant-design/icons";
 import "./userManagement.css";
 
+/* ================= CONSTANT ================= */
+
+const ROLE_COLOR = {
+  "RESCUE TEAM": "blue",
+  COORDINATOR: "purple",
+  MANAGER: "gold",
+  ADMIN: "red",
+};
+
+const STATUS_COLOR = {
+  "Hoạt động": "green",
+  "Nghỉ phép": "orange",
+  Khóa: "red",
+};
+
+/* ================= MAIN ================= */
+
 export default function UserManagement() {
-  const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
-  const [drawerVisible, setDrawerVisible] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isEdit, setIsEdit] = useState(false);
 
   const [users, setUsers] = useState([
     {
@@ -49,53 +58,63 @@ export default function UserManagement() {
     },
   ]);
 
-  const roleColorMap = {
-    "RESCUE TEAM": "blue",
-    COORDINATOR: "purple",
-    MANAGER: "gold",
-    ADMIN: "red",
+  const [modalOpen, setModalOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  /* ================= HANDLER ================= */
+
+  const openCreateModal = () => {
+    setIsEdit(false);
+    form.resetFields();
+    setModalOpen(true);
   };
 
-  const statusColorMap = {
-    "Hoạt động": "green",
-    "Nghỉ phép": "orange",
-    Khóa: "red",
+  const openEditModal = (user) => {
+    setSelectedUser(user);
+    setIsEdit(true);
+    form.setFieldsValue(user);
+    setDrawerOpen(false);
+    setModalOpen(true);
   };
 
-  const handleSubmit = () => {
-    form.validateFields().then((values) => {
-      if (isEdit) {
-        setUsers(
-          users.map((u) =>
-            u.id === selectedUser.id
-              ? {
-                  ...u,
-                  ...values,
-                  roleColor: roleColorMap[values.role],
-                  statusColor: statusColorMap[values.status],
-                }
-              : u
-          )
-        );
-      } else {
-        setUsers([
-          {
-            id: Date.now(),
-            ...values,
-            roleColor: roleColorMap[values.role],
-            statusColor: statusColorMap[values.status],
-            last: "Vừa xong",
-            joinDate: new Date().toLocaleDateString(),
-          },
-          ...users,
-        ]);
-      }
+  const handleSubmit = async () => {
+    const values = await form.validateFields();
 
-      setOpen(false);
-      setIsEdit(false);
-      form.resetFields();
-    });
+    if (isEdit) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === selectedUser.id
+            ? {
+                ...u,
+                ...values,
+                roleColor: ROLE_COLOR[values.role],
+                statusColor: STATUS_COLOR[values.status],
+              }
+            : u
+        )
+      );
+    } else {
+      setUsers((prev) => [
+        {
+          id: Date.now(),
+          ...values,
+          roleColor: ROLE_COLOR[values.role],
+          statusColor: STATUS_COLOR[values.status],
+          last: "Vừa xong",
+          joinDate: new Date().toLocaleDateString(),
+        },
+        ...prev,
+      ]);
+    }
+
+    setModalOpen(false);
+    setIsEdit(false);
+    form.resetFields();
   };
+
+  /* ================= RENDER ================= */
 
   return (
     <div className="user-page">
@@ -105,15 +124,7 @@ export default function UserManagement() {
           <h2>Danh sách người dùng</h2>
           <p>Quản lý thành viên hệ thống cứu hộ</p>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            setIsEdit(false);
-            form.resetFields();
-            setOpen(true);
-          }}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
           Tạo người dùng
         </Button>
       </div>
@@ -138,12 +149,12 @@ export default function UserManagement() {
         <table>
           <thead>
             <tr>
-              <th></th>
+              <th />
               <th>Người dùng</th>
               <th>Vai trò</th>
               <th>Khu vực</th>
               <th>Trạng thái</th>
-              <th></th>
+              <th />
             </tr>
           </thead>
           <tbody>
@@ -152,25 +163,21 @@ export default function UserManagement() {
                 key={u.id}
                 onClick={() => {
                   setSelectedUser(u);
-                  setDrawerVisible(true);
+                  setDrawerOpen(true);
                 }}
               >
-                <td>
-                  <Checkbox />
-                </td>
+                <td><Checkbox /></td>
                 <td>
                   <b>{u.name}</b>
                   <div>{u.email}</div>
                 </td>
-                <td>
-                  <Tag color={u.roleColor}>{u.role}</Tag>
-                </td>
+                <td><Tag color={u.roleColor}>{u.role}</Tag></td>
                 <td>{u.area}</td>
                 <td>
                   <span className={`status ${u.statusColor}`}>{u.status}</span>
                 </td>
                 <td>
-                  <EditOutlined />
+                  <EditOutlined onClick={() => openEditModal(u)} />
                 </td>
               </tr>
             ))}
@@ -178,22 +185,17 @@ export default function UserManagement() {
         </table>
       </div>
 
-      {/* DRAWER DETAIL */}
+      {/* DRAWER */}
       <Drawer
-        open={drawerVisible}
+        open={drawerOpen}
         width={520}
-        onClose={() => setDrawerVisible(false)}
+        onClose={() => setDrawerOpen(false)}
         title="Chi tiết người dùng"
         extra={
           <Button
             type="primary"
             icon={<EditOutlined />}
-            onClick={() => {
-              form.setFieldsValue(selectedUser);
-              setIsEdit(true);
-              setDrawerVisible(false);
-              setOpen(true);
-            }}
+            onClick={() => openEditModal(selectedUser)}
           >
             Chỉnh sửa
           </Button>
@@ -202,109 +204,17 @@ export default function UserManagement() {
         {selectedUser && <UserDetail user={selectedUser} />}
       </Drawer>
 
-      {/* MODAL FORM */}
+      {/* MODAL */}
       <Modal
-  open={open}
-  onCancel={() => setOpen(false)}
-  onOk={handleSubmit}
-  width={720}
-  title={isEdit ? "Chỉnh sửa người dùng" : "Tạo người dùng mới"}
-  okText={isEdit ? "Lưu thay đổi" : "Tạo người dùng"}
->
-  <Form layout="vertical" form={form}>
-    {/* ===== Thông tin cơ bản ===== */}
-    <Divider orientation="left">📋 Thông tin cơ bản</Divider>
-
-    <div className="form-grid">
-      <Form.Item
-        label="Họ và tên"
-        name="name"
-        rules={[{ required: true, message: "Nhập họ tên" }]}
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        onOk={handleSubmit}
+        width={720}
+        title={isEdit ? "Chỉnh sửa người dùng" : "Tạo người dùng mới"}
+        okText={isEdit ? "Lưu thay đổi" : "Tạo người dùng"}
       >
-        <Input placeholder="Nguyễn Văn A" />
-      </Form.Item>
-
-
-      <Form.Item
-        label="Điện thoại"
-        name="phone"
-        rules={[
-          { required: true, message: "Nhập SĐT" },
-          { pattern: /^0\d{9}$/, message: "SĐT phải 10 số, bắt đầu bằng 0" },
-        ]}
-      >
-        <Input placeholder="0912345678" />
-      </Form.Item>
-
-      <Form.Item label="Địa chỉ" name="address">
-        <Input placeholder="123 Đường Láng, Hà Nội" />
-      </Form.Item>
-    </div>
-
-    {/* ===== Thông tin công việc ===== */}
-    <Divider orientation="left">💼 Thông tin công việc</Divider>
-
-    <div className="form-grid">
-      <Form.Item
-        label="Vai trò"
-        name="role"
-        rules={[{ required: true, message: "Chọn vai trò" }]}
-      >
-        <Select placeholder="Chọn vai trò">
-          <Select.Option value="RESCUE TEAM">Rescue Team</Select.Option>
-          <Select.Option value="COORDINATOR">Coordinator</Select.Option>
-          <Select.Option value="MANAGER">Manager</Select.Option>
-        </Select>
-      </Form.Item>
-
-      <Form.Item
-        label="Bộ phận"
-        name="department"
-        rules={[{ required: true, message: "Chọn đội" }]}
-      >
-        <Select placeholder="Chọn đội cứu hộ">
-          <Select.Option value="Đội Cứu Hộ 1">Đội Cứu Hộ 1</Select.Option>
-          <Select.Option value="Đội Cứu Hộ 2">Đội Cứu Hộ 2</Select.Option>
-          <Select.Option value="Phòng Điều Phối">Phòng Điều Phối</Select.Option>
-        </Select>
-      </Form.Item>
-
-      <Form.Item
-        label="Khu vực"
-        name="area"
-        rules={[{ required: true, message: "Nhập khu vực" }]}
-      >
-        <Input placeholder="Hà Nội - Đội 1" />
-      </Form.Item>
-
-      <Form.Item label="Trạng thái" name="status" initialValue="Hoạt động">
-        <Select>
-          <Select.Option value="Hoạt động">Hoạt động</Select.Option>
-          <Select.Option value="Khóa">Khóa</Select.Option>
-        </Select>
-      </Form.Item>
-    </div>
-
-    {/* ===== Bảo mật ===== */}
-    <Divider orientation="left">🔐 Bảo mật & Truy cập</Divider>
-
-    <Form.Item
-      label="Mật khẩu"
-      name="password"
-      rules={[
-        { required: true, message: "Nhập mật khẩu" },
-        { min: 6, message: "Tối thiểu 6 ký tự" },
-      ]}
-    >
-      <Input placeholder="Tối thiểu 6 ký tự" />
-    </Form.Item>
-
-    <Form.Item label="Ghi chú" name="notes">
-      <Input.TextArea rows={3} placeholder="Ghi chú thêm về người dùng..." />
-    </Form.Item>
-  </Form>
-</Modal>
-
+        <UserForm form={form} />
+      </Modal>
     </div>
   );
 }
@@ -357,5 +267,80 @@ function Item({ label, value }) {
       <span>{label}</span>
       <b>{value}</b>
     </div>
+  );
+}
+
+/* ================= FORM ================= */
+
+function UserForm({ form }) {
+  return (
+    <Form layout="vertical" form={form}>
+      <Divider orientation="left">📋 Thông tin cơ bản</Divider>
+
+      <div className="form-grid">
+        <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          label="Điện thoại"
+          name="phone"
+          rules={[
+            { required: true },
+            { pattern: /^0\d{9}$/, message: "SĐT không hợp lệ" },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Địa chỉ" name="address">
+          <Input />
+        </Form.Item>
+      </div>
+
+      <Divider orientation="left">💼 Thông tin công việc</Divider>
+
+      <div className="form-grid">
+        <Form.Item label="Vai trò" name="role" rules={[{ required: true }]}>
+          <Select>
+            <Select.Option value="RESCUE TEAM">Rescue Team</Select.Option>
+            <Select.Option value="COORDINATOR">Coordinator</Select.Option>
+            <Select.Option value="MANAGER">Manager</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item label="Bộ phận" name="department" rules={[{ required: true }]}>
+          <Select>
+            <Select.Option value="Đội Cứu Hộ 1">Đội Cứu Hộ 1</Select.Option>
+            <Select.Option value="Đội Cứu Hộ 2">Đội Cứu Hộ 2</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item label="Khu vực" name="area" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Trạng thái" name="status" initialValue="Hoạt động">
+          <Select>
+            <Select.Option value="Hoạt động">Hoạt động</Select.Option>
+            <Select.Option value="Khóa">Khóa</Select.Option>
+          </Select>
+        </Form.Item>
+      </div>
+
+      <Divider orientation="left">🔐 Bảo mật</Divider>
+
+      <Form.Item
+        label="Mật khẩu"
+        name="password"
+        rules={[{ required: true }, { min: 6 }]}
+      >
+        <Input.Password />
+      </Form.Item>
+
+      <Form.Item label="Ghi chú" name="notes">
+        <Input.TextArea rows={3} />
+      </Form.Item>
+    </Form>
   );
 }

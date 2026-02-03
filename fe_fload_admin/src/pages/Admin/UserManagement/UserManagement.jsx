@@ -3,32 +3,41 @@ import {
   Button,
   Tag,
   Checkbox,
-  Pagination,
-  Tooltip,
   Modal,
   Form,
   Input,
   Select,
   Drawer,
+  Divider,
 } from "antd";
 import {
-  DownloadOutlined,
   PlusOutlined,
   TeamOutlined,
   ThunderboltOutlined,
   CheckCircleOutlined,
-  ClockCircleOutlined,
-  LockOutlined,
   EditOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
 import "./userManagement.css";
 
+/* ================= CONSTANT ================= */
+
+const ROLE_COLOR = {
+  "RESCUE TEAM": "blue",
+  COORDINATOR: "purple",
+  MANAGER: "gold",
+  ADMIN: "red",
+};
+
+const STATUS_COLOR = {
+  "Hoạt động": "green",
+  "Nghỉ phép": "orange",
+  Khóa: "red",
+};
+
+/* ================= MAIN ================= */
+
 export default function UserManagement() {
-  const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
-  const [drawerVisible, setDrawerVisible] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
 
   const [users, setUsers] = useState([
     {
@@ -36,67 +45,76 @@ export default function UserManagement() {
       name: "Nguyễn Văn An",
       email: "an.nguyen@rescue.vn",
       phone: "0912345678",
+      address: "123 Đường Láng, Hà Nội",
       role: "RESCUE TEAM",
       roleColor: "blue",
+      department: "Đội Cứu Hộ 1",
       area: "Hà Nội - Đội 1",
       status: "Hoạt động",
       statusColor: "green",
       last: "Vừa xong",
       joinDate: "15/01/2024",
-      department: "Đội Cứu Hộ 1",
-      experience: "5 năm",
-      skills: ["Cứu hộ nước", "Cấp cứu", "Tìm kiếm"],
-      certification: "Chứng chỉ Cứu hộ Quốc Tế",
-      address: "123 Đường Láng, Hà Nội",
-    },
-    {
-      id: 2,
-      name: "Trần Thị Bích",
-      email: "bich.tran@rescue.vn",
-      phone: "0987654321",
-      role: "COORDINATOR",
-      roleColor: "purple",
-      area: "TP.HCM - TTĐP",
-      status: "Nghỉ phép",
-      statusColor: "orange",
-      last: "2 giờ trước",
-      joinDate: "20/03/2023",
-      department: "Phòng Điều Phối",
-      experience: "8 năm",
-      skills: ["Điều phối", "Quản lý dự án", "Báo cáo"],
-      certification: "Chứng chỉ Quản lý Khủng Hoảng",
-      address: "456 Nguyễn Hữu Cảnh, TP.HCM",
+      notes: "",
     },
   ]);
 
-  const roleColorMap = {
-    "RESCUE TEAM": "blue",
-    COORDINATOR: "purple",
-    MANAGER: "gold",
-    ADMIN: "red",
+  const [modalOpen, setModalOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  /* ================= HANDLER ================= */
+
+  const openCreateModal = () => {
+    setIsEdit(false);
+    form.resetFields();
+    setModalOpen(true);
   };
 
-  const statusColorMap = {
-    "Hoạt động": "green",
-    "Nghỉ phép": "orange",
-    Khóa: "red",
+  const openEditModal = (user) => {
+    setSelectedUser(user);
+    setIsEdit(true);
+    form.setFieldsValue(user);
+    setDrawerOpen(false);
+    setModalOpen(true);
   };
 
-  const handleCreateUser = () => {
-    form.validateFields().then((values) => {
-      const newUser = {
-        id: Date.now(),
-        ...values,
-        roleColor: roleColorMap[values.role],
-        statusColor: statusColorMap[values.status],
-        last: "Vừa xong",
-      };
+  const handleSubmit = async () => {
+    const values = await form.validateFields();
 
-      setUsers([newUser, ...users]);
-      setOpen(false);
-      form.resetFields();
-    });
+    if (isEdit) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === selectedUser.id
+            ? {
+                ...u,
+                ...values,
+                roleColor: ROLE_COLOR[values.role],
+                statusColor: STATUS_COLOR[values.status],
+              }
+            : u
+        )
+      );
+    } else {
+      setUsers((prev) => [
+        {
+          id: Date.now(),
+          ...values,
+          roleColor: ROLE_COLOR[values.role],
+          statusColor: STATUS_COLOR[values.status],
+          last: "Vừa xong",
+          joinDate: new Date().toLocaleDateString(),
+        },
+        ...prev,
+      ]);
+    }
+
+    setModalOpen(false);
+    setIsEdit(false);
+    form.resetFields();
   };
+
+  /* ================= RENDER ================= */
 
   return (
     <div className="user-page">
@@ -104,50 +122,25 @@ export default function UserManagement() {
       <div className="page-header">
         <div>
           <h2>Danh sách người dùng</h2>
-          <p>Quản lý thành viên, phân quyền và bảo mật hệ thống cứu hộ tập trung.</p>
+          <p>Quản lý thành viên hệ thống cứu hộ</p>
         </div>
-
-        <div className="page-actions">
-          <Button icon={<DownloadOutlined />}>Xuất dữ liệu</Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setOpen(true)}
-          >
-            Tạo người dùng mới
-          </Button>
-        </div>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+          Tạo người dùng
+        </Button>
       </div>
 
-      {/* STATISTIC */}
+      {/* STAT */}
       <div className="stat-cards">
-        <StatCard
-          title="TỔNG NGƯỜI DÙNG"
-          value={users.length}
-          note="Tổng hệ thống"
-          icon={<TeamOutlined />}
-          color="teal"
-        />
+        <StatCard title="TỔNG NGƯỜI DÙNG" value={users.length} icon={<TeamOutlined />} />
         <StatCard
           title="RESCUE TEAM"
           value={users.filter((u) => u.role === "RESCUE TEAM").length}
-          note="Nhân sự thực địa"
           icon={<ThunderboltOutlined />}
-          color="orange"
         />
         <StatCard
           title="ĐANG HOẠT ĐỘNG"
           value={users.filter((u) => u.status === "Hoạt động").length}
-          note="Online"
           icon={<CheckCircleOutlined />}
-          color="green"
-        />
-        <StatCard
-          title="ĐANG CHỜ DUYỆT"
-          value="0"
-          note="Không có"
-          icon={<ClockCircleOutlined />}
-          color="yellow"
         />
       </div>
 
@@ -156,346 +149,190 @@ export default function UserManagement() {
         <table>
           <thead>
             <tr>
-              <th className="col-checkbox">
-                <Checkbox />
-              </th>
-              <th>NGƯỜI DÙNG</th>
-              <th>VAI TRÒ</th>
-              <th>KHU VỰC</th>
-              <th>TRẠNG THÁI</th>
-              <th>LẦN CUỐI</th>
-              <th>THAO TÁC</th>
+              <th />
+              <th>Người dùng</th>
+              <th>Vai trò</th>
+              <th>Khu vực</th>
+              <th>Trạng thái</th>
+              <th />
             </tr>
           </thead>
-
           <tbody>
             {users.map((u) => (
-              <UserRow 
-                key={u.id} 
-                {...u} 
-                onSelect={() => {
+              <tr
+                key={u.id}
+                onClick={() => {
                   setSelectedUser(u);
-                  setDrawerVisible(true);
+                  setDrawerOpen(true);
                 }}
-              />
+              >
+                <td><Checkbox /></td>
+                <td>
+                  <b>{u.name}</b>
+                  <div>{u.email}</div>
+                </td>
+                <td><Tag color={u.roleColor}>{u.role}</Tag></td>
+                <td>{u.area}</td>
+                <td>
+                  <span className={`status ${u.statusColor}`}>{u.status}</span>
+                </td>
+                <td>
+                  <EditOutlined onClick={() => openEditModal(u)} />
+                </td>
+              </tr>
             ))}
           </tbody>
         </table>
-
-        <div className="table-footer">
-          <span>Hiển thị {users.length} người dùng</span>
-          <Pagination total={users.length} />
-        </div>
       </div>
 
-      {/* DRAWER - USER DETAIL */}
+      {/* DRAWER */}
       <Drawer
-        title={selectedUser ? `👤 ${selectedUser.name}` : "Chi tiết người dùng"}
-        placement="right"
-        onClose={() => setDrawerVisible(false)}
-        open={drawerVisible}
-        width={600}
+        open={drawerOpen}
+        width={520}
+        onClose={() => setDrawerOpen(false)}
+        title="Chi tiết người dùng"
+        extra={
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => openEditModal(selectedUser)}
+          >
+            Chỉnh sửa
+          </Button>
+        }
       >
         {selectedUser && <UserDetail user={selectedUser} />}
       </Drawer>
 
-      {/* MODAL CREATE USER */}
+      {/* MODAL */}
       <Modal
-        title="Tạo người dùng mới"
-        open={open}
-        onCancel={() => {
-          setOpen(false);
-          form.resetFields();
-        }}
-        onOk={handleCreateUser}
-        okText="Tạo người dùng"
-        cancelText="Hủy"
-        width={700}
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        onOk={handleSubmit}
+        width={720}
+        title={isEdit ? "Chỉnh sửa người dùng" : "Tạo người dùng mới"}
+        okText={isEdit ? "Lưu thay đổi" : "Tạo người dùng"}
       >
-        <Form form={form} layout="vertical">
-          {/* THÔNG TIN CƠ BẢN */}
-          <div style={{ marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid #f0f0f0" }}>
-            <h4 style={{ fontWeight: 600, marginBottom: "12px", color: "#1a7c5a" }}>📋 Thông tin cơ bản</h4>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <Form.Item
-              label="Họ và tên"
-              name="name"
-              rules={[{ required: true, message: "Nhập tên" }]}
-            >
-              <Input placeholder="Nguyễn Văn A" />
-            </Form.Item>
-
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                { required: true, message: "Nhập email" },
-                { type: "email", message: "Email không hợp lệ" },
-              ]}
-            >
-              <Input placeholder="user@rescue.vn" type="email" />
-            </Form.Item>
-
-            <Form.Item
-              label="Điện thoại"
-              name="phone"
-              rules={[{ required: true, message: "Nhập số điện thoại" }]}
-            >
-              <Input placeholder="0912345678" />
-            </Form.Item>
-
-            <Form.Item label="Địa chỉ" name="address">
-              <Input placeholder="123 Đường Láng, Hà Nội" />
-            </Form.Item>
-          </div>
-
-          {/* THÔNG TIN CÔNG VIỆC */}
-          <div style={{ marginBottom: "16px", marginTop: "20px", paddingBottom: "12px", borderBottom: "1px solid #f0f0f0" }}>
-            <h4 style={{ fontWeight: 600, marginBottom: "12px", color: "#1a7c5a" }}>💼 Thông tin công việc</h4>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <Form.Item label="Vai trò" name="role" rules={[{ required: true, message: "Chọn vai trò" }]}>
-              <Select placeholder="Chọn vai trò">
-                <Select.Option value="RESCUE TEAM">Rescue Team</Select.Option>
-                <Select.Option value="COORDINATOR">Coordinator</Select.Option>
-                <Select.Option value="MANAGER">Manager</Select.Option>
-                <Select.Option value="ADMIN">Admin</Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="Bộ phận" name="department">
-              <Input placeholder="Đội Cứu Hộ 1" />
-            </Form.Item>
-
-            <Form.Item label="Khu vực" name="area" rules={[{ required: true, message: "Nhập khu vực" }]}>
-              <Input placeholder="Hà Nội - Đội 1" />
-            </Form.Item>
-
-            <Form.Item label="Trạng thái" name="status" initialValue="Hoạt động">
-              <Select>
-                <Select.Option value="Hoạt động">Hoạt động</Select.Option>
-                <Select.Option value="Nghỉ phép">Nghỉ phép</Select.Option>
-                <Select.Option value="Khóa">Khóa</Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="Kinh nghiệm" name="experience">
-              <Input placeholder="5 năm" />
-            </Form.Item>
-          </div>
-
-          {/* BẢO MẬT & TRUY CẬP */}
-          <div style={{ marginBottom: "16px", marginTop: "20px", paddingBottom: "12px", borderBottom: "1px solid #f0f0f0" }}>
-            <h4 style={{ fontWeight: 600, marginBottom: "12px", color: "#1a7c5a" }}>🔐 Bảo mật & Truy cập</h4>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <Form.Item
-              label="Mật khẩu"
-              name="password"
-              rules={[
-                { required: true, message: "Nhập mật khẩu" },
-                { min: 6, message: "Mật khẩu ít nhất 6 ký tự" },
-              ]}
-            >
-              <Input.Password placeholder="Tối thiểu 6 ký tự" />
-            </Form.Item>
-
-            <Form.Item
-              label="Xác nhận mật khẩu"
-              name="confirmPassword"
-              rules={[
-                { required: true, message: "Xác nhận mật khẩu" },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("Mật khẩu không khớp"));
-                  },
-                }),
-              ]}
-            >
-              <Input.Password placeholder="Xác nhận mật khẩu" />
-            </Form.Item>
-          </div>
-
-          {/* GHI CHÚ */}
-          <Form.Item label="Ghi chú" name="notes">
-            <Input.TextArea rows={3} placeholder="Ghi chú thêm về người dùng..." />
-          </Form.Item>
-        </Form>
+        <UserForm form={form} />
       </Modal>
     </div>
   );
 }
 
-/* ================= COMPONENT ================= */
+/* ================= SUB ================= */
 
-function StatCard({ title, value, note, icon, color }) {
+function StatCard({ title, value, icon }) {
   return (
     <div className="stat-card">
-      <div className={`stat-icon ${color}`}>{icon}</div>
-      <p>{title}</p>
+      {icon}
       <h3>{value}</h3>
-      <span>{note}</span>
+      <p>{title}</p>
     </div>
-  );
-}
-
-function UserRow({
-  name,
-  email,
-  role,
-  roleColor,
-  area,
-  status,
-  statusColor,
-  last,
-  onSelect,
-}) {
-  return (
-    <tr onClick={onSelect} style={{ cursor: "pointer" }}>
-      <td>
-        <Checkbox />
-      </td>
-
-      <td>
-        <div className="user-cell">
-          <div className="avatar">{name[0]}</div>
-          <div>
-            <strong>{name}</strong>
-            <p>{email}</p>
-          </div>
-        </div>
-      </td>
-
-      <td>
-        <Tag color={roleColor}>{role}</Tag>
-      </td>
-
-      <td>{area}</td>
-
-      <td>
-        <span className={`status ${statusColor}`}>{status}</span>
-      </td>
-
-      <td>{last}</td>
-
-      <td className="col-action">
-        <Tooltip title="Khóa">
-          <LockOutlined />
-        </Tooltip>
-        <Tooltip title="Chỉnh sửa">
-          <EditOutlined />
-        </Tooltip>
-        <Tooltip title="Xóa">
-          <DeleteOutlined />
-        </Tooltip>
-      </td>
-    </tr>
   );
 }
 
 function UserDetail({ user }) {
   return (
-    <div className="user-detail">
-      {/* Avatar and Name */}
-      <div className="user-detail-header">
-        <div className="user-detail-avatar">{user.name[0]}</div>
-        <div>
-          <h3>{user.name}</h3>
-          <Tag color={user.roleColor}>{user.role}</Tag>
-        </div>
-      </div>
+    <div className="user-detail-box">
+      <Section title="Thông tin liên hệ">
+        <Item label="Họ tên" value={user.name} />
+        <Item label="Email" value={user.email} />
+        <Item label="Điện thoại" value={user.phone} />
+        <Item label="Địa chỉ" value={user.address} />
+      </Section>
 
-      {/* Contact Info */}
-      <div className="detail-section">
-        <h4>📞 Thông tin liên hệ</h4>
-        <div className="detail-row">
-          <span className="label">Email:</span>
-          <span className="value">{user.email}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Điện thoại:</span>
-          <span className="value">{user.phone}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Địa chỉ:</span>
-          <span className="value">{user.address}</span>
-        </div>
-      </div>
-
-      {/* Work Info */}
-      <div className="detail-section">
-        <h4>💼 Thông tin công việc</h4>
-        <div className="detail-row">
-          <span className="label">Vị trí:</span>
-          <span className="value">{user.role}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Bộ phận:</span>
-          <span className="value">{user.department}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Khu vực:</span>
-          <span className="value">{user.area}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Kinh nghiệm:</span>
-          <span className="value">{user.experience}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Ngày tham gia:</span>
-          <span className="value">{user.joinDate}</span>
-        </div>
-      </div>
-
-      {/* Skills */}
-      <div className="detail-section">
-        <h4>🎯 Kỹ năng</h4>
-        <div className="skills-list">
-          {user.skills.map((skill, idx) => (
-            <Tag key={idx} color="blue">
-              {skill}
-            </Tag>
-          ))}
-        </div>
-      </div>
-
-      {/* Certification */}
-      <div className="detail-section">
-        <h4>🏅 Chứng chỉ</h4>
-        <div className="detail-row">
-          <span className="value">{user.certification}</span>
-        </div>
-      </div>
-
-      {/* Status */}
-      <div className="detail-section">
-        <h4>⚡ Trạng thái</h4>
-        <div className="detail-row">
-          <span className="label">Trạng thái hiện tại:</span>
-          <span className={`status ${user.statusColor}`}>{user.status}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Lần cuối hoạt động:</span>
-          <span className="value">{user.last}</span>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="detail-actions">
-        <Button type="primary" block>
-          Chỉnh sửa thông tin
-        </Button>
-        <Button danger block>
-          Khóa tài khoản
-        </Button>
-      </div>
+      <Section title="Thông tin công việc">
+        <Item label="Vai trò" value={user.role} />
+        <Item label="Bộ phận" value={user.department} />
+        <Item label="Khu vực" value={user.area} />
+        <Item label="Trạng thái" value={user.status} />
+        <Item label="Ngày tham gia" value={user.joinDate} />
+      </Section>
     </div>
   );
 }
+
+function Section({ title, children }) {
+  return (
+    <>
+      <h4 style={{ marginTop: 16 }}>{title}</h4>
+      {children}
+    </>
+  );
+}
+
+function Item({ label, value }) {
+  return (
+    <div className="detail-row">
+      <span>{label}</span>
+      <b>{value}</b>
+    </div>
+  );
+}
+
+/* ================= FORM ================= */
+
+function UserForm({ form }) {
+  return (
+    <Form layout="vertical" form={form}>
+      <Divider orientation="left">📋 Thông tin cơ bản</Divider>
+
+      <div className="form-grid">
+        <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          label="Điện thoại"
+          name="phone"
+          rules={[
+            { required: true },
+            { pattern: /^0\d{9}$/, message: "SĐT không hợp lệ" },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+      </div>
+
+      <Divider orientation="left">💼 Thông tin công việc</Divider>
+
+      <div className="form-grid">
+        <Form.Item label="Vai trò" name="role" rules={[{ required: true }]}>
+          <Select>
+            <Select.Option value="RESCUE TEAM">Rescue Team</Select.Option>
+            <Select.Option value="COORDINATOR">Coordinator</Select.Option>
+            <Select.Option value="MANAGER">Manager</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item label="Bộ phận" name="department" rules={[{ required: true }]}>
+          <Select>
+            <Select.Option value="Đội Cứu Hộ 1">Đội Cứu Hộ 1</Select.Option>
+            <Select.Option value="Đội Cứu Hộ 2">Đội Cứu Hộ 2</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item label="Trạng thái" name="status" initialValue="Hoạt động">
+          <Select>
+            <Select.Option value="Hoạt động">Hoạt động</Select.Option>
+            <Select.Option value="Khóa">Khóa</Select.Option>
+          </Select>
+        </Form.Item>
+      </div>
+
+      <Divider orientation="left">🔐 Bảo mật</Divider>
+
+      <Form.Item
+        label="Mật khẩu"
+        name="password"
+        rules={[{ required: true }, { min: 6 }]}
+      >
+        <Input.Password />
+      </Form.Item>
+
+      <Form.Item label="Ghi chú" name="notes">
+        <Input.TextArea rows={3} />
+      </Form.Item>
+    </Form>
+  );
+}
+

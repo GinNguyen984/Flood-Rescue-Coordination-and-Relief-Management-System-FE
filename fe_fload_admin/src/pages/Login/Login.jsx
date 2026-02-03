@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextField, InputAdornment } from "@mui/material";
 import {
@@ -9,20 +9,18 @@ import {
 } from "@mui/icons-material";
 import { Button } from "antd";
 import { loginApi } from "../../../api/axios/authApi";
+import bg from "../../../src/assets/LoginImage/images.jpeg";
+import shield from "../../../src/assets/LoginImage/shield.svg";
+import AuthNotify from "../../components/Common/AuthNotify";
+
 import "./login.css";
 
 export default function Login() {
-  const [show, setShow] = useState(false);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-
-  // 👉 đảm bảo form luôn trắng khi vào trang
-  useEffect(() => {
-    setPhone("");
-    setPassword("");
-  }, []);
 
   const redirectByRole = {
     admin: "/admin",
@@ -32,90 +30,133 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
-    let newErrors = {};
-    if (!phone) newErrors.phone = "Vui lòng nhập số điện thoại";
-    if (!password) newErrors.password = "Vui lòng nhập mật khẩu";
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length) return;
+    const e = {};
+    if (!phone) e.phone = "Nhập số điện thoại";
+    if (!password) e.password = "Nhập mật khẩu";
+    setErrors(e);
+    if (Object.keys(e).length) return;
 
     try {
       const res = await loginApi({ phone, password });
-      const { token, role } = res.data;
+      const { token, user } = res.data;
+      const role = user.roleName.toLowerCase();
 
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
+      localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("isAuth", "true");
 
-      navigate(redirectByRole[role] || "/", { replace: true });
-    } catch (err) {
-      setErrors({
-        password:
-          err.response?.data?.message ||
-          "Số điện thoại hoặc mật khẩu không đúng",
-      });
+       // ✅ THÔNG BÁO THÀNH CÔNG
+       AuthNotify.success(
+        "Đăng nhập thành công",
+        `Chào mừng ${user.fullName}`
+      );
+
+    // delay nhẹ để thấy notify
+    setTimeout(() => {
+      navigate(redirectByRole[role], { replace: true });
+    }, 300);
+
+      navigate(redirectByRole[role], { replace: true });
+    } catch {
+      AuthNotify.error("Sai số điện thoại hoặc mật khẩu");
+      setErrors({ password: "Sai số điện thoại hoặc mật khẩu" });
     }
   };
 
   return (
     <div className="login-page">
+      {/* LEFT */}
+      <div
+        className="login-hero"
+        style={{ backgroundImage: `url(${bg})` }}
+      >
+        <div className="hero-overlay">
+          <div className="hero-top">
+            <img src={shield} alt="" />
+            <span>PREMIUM COMMAND</span>
+          </div>
+
+          <h1>
+            QUẢN TRỊ <br />
+            CAO CẤP & <span>BẢO MẬT</span>
+          </h1>
+
+          <p>
+            Giao diện điều hành thế hệ mới dành cho cán bộ
+            vận hành cứu hộ quốc gia.
+          </p>
+
+          <div className="hero-metrics">
+            <span>24/7 VẬN HÀNH</span>
+            <span>AES-256</span>
+            <span>REALTIME</span>
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT */}
       <div className="login-card">
-        <h1>Đăng nhập</h1>
+        <h2>Đăng nhập</h2>
+        <div className="login-line" />
+        <p className="login-desc">
+          Truy cập hệ thống quản trị vận hành cao cấp
+        </p>
 
         <div className="login-form">
-          {/* PHONE */}
-          <TextField
-            fullWidth
-            variant="filled"
-            placeholder="Số điện thoại"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            error={!!errors.phone}
-            autoComplete="off"
-            name="phone"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PhoneAndroid />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <div className="form-group">
+            <label className="login-label">TÀI KHOẢN NỘI BỘ</label>
+            <TextField
+              fullWidth
+              variant="filled"
+              placeholder="Số điện thoại"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              error={!!errors.phone}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneAndroid />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            {errors.phone && <span className="error-text">{errors.phone}</span>}
+          </div>
 
-          {/* PASSWORD */}
-          <TextField
-            fullWidth
-            variant="filled"
-            type={show ? "text" : "password"}
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={!!errors.password}
-            autoComplete="new-password"
-            name="password"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockOutlined />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment
-                  position="end"
-                  onClick={() => setShow(!show)}
-                  style={{ cursor: "pointer" }}
-                >
-                  {show ? <VisibilityOff /> : <Visibility />}
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {errors.password && (
-            <span className="error-text">{errors.password}</span>
-          )}
+          <div className="form-group">
+            <label className="login-label">MẬT KHẨU HỆ THỐNG</label>
+            <TextField
+              fullWidth
+              variant="filled"
+              type={show ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!errors.password}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment
+                    position="end"
+                    className="eye"
+                    onClick={() => setShow(!show)}
+                  >
+                    {show ? <VisibilityOff /> : <Visibility />}
+                  </InputAdornment>
+                ),
+              }}
+            />
+            {errors.password && (
+              <span className="error-text">{errors.password}</span>
+            )}
+          </div>
 
           <Button
-            type="primary"
             block
             size="large"
             className="login-btn"

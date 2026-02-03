@@ -292,10 +292,6 @@ function UserForm({ form }) {
         >
           <Input />
         </Form.Item>
-
-        <Form.Item label="Địa chỉ" name="address">
-          <Input />
-        </Form.Item>
       </div>
 
       <Divider orientation="left">💼 Thông tin công việc</Divider>
@@ -315,11 +311,6 @@ function UserForm({ form }) {
             <Select.Option value="Đội Cứu Hộ 2">Đội Cứu Hộ 2</Select.Option>
           </Select>
         </Form.Item>
-
-        <Form.Item label="Khu vực" name="area" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-
         <Form.Item label="Trạng thái" name="status" initialValue="Hoạt động">
           <Select>
             <Select.Option value="Hoạt động">Hoạt động</Select.Option>
@@ -344,3 +335,4 @@ function UserForm({ form }) {
     </Form>
   );
 }
+

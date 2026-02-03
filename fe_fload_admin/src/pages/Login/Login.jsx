@@ -8,7 +8,7 @@ import {
   VisibilityOff,
 } from "@mui/icons-material";
 import { Button } from "antd";
-import { loginApi } from "../../../api/axios/authApi";
+import { loginApi } from "../../../api/axios/Auth/authApi";
 import bg from "../../../src/assets/LoginImage/images.jpeg";
 import shield from "../../../src/assets/LoginImage/shield.svg";
 import AuthNotify from "../../components/Common/AuthNotify";

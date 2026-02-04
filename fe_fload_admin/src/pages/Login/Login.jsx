@@ -78,8 +78,8 @@ export default function Login() {
           </div>
 
           <h1>
-            QUẢN TRỊ <br />
-            CAO CẤP & <span>BẢO MẬT</span>
+            HỆ THỐNG <br />
+            QUẢN LÝ & <span>BẢO MẬT</span>
           </h1>
 
           <p>

@@ -18,11 +18,29 @@ import {
   WarningOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-
+import { createRescueRequest } from "../../api/service/emergencyApi";
 import "./EmergencyRequest.css";
 
 const { TextArea } = Input;
 const { Option } = Select;
+
+// Theo Swagger API: MainIncidentType và SpecificCondition enum
+const MAIN_INCIDENT_OPTIONS = [
+  { value: "MedicalEmergency", label: "Y tế khẩn cấp" },
+  { value: "TrafficAccident", label: "Tai nạn giao thông" },
+  { value: "FireExplosion", label: "Cháy nổ" },
+  { value: "DisasterFlood", label: "Ngập lụt" },
+];
+const SPECIFIC_CONDITION_OPTIONS = [
+  { value: "SevereFlood", label: "Ngập nặng" },
+  { value: "FireExplosion", label: "Cháy nổ" },
+  { value: "Landslide", label: "Sạt lở" },
+  { value: "InjuredPeople", label: "Có người bị thương" },
+  { value: "ElderlyOrChildren", label: "Người già/trẻ em" },
+  { value: "PowerOrCommunicationOutage", label: "Mất điện/liên lạc" },
+];
+// AreaId bắt buộc >= 1 trên BE (0 dễ gây 500). Đổi nếu BE dùng area khác.
+const DEFAULT_AREA_ID = 1;
 
 const EmergencyRequest = () => {
   const [gps, setGps] = useState(null);
@@ -30,42 +48,104 @@ const EmergencyRequest = () => {
   const [loadingGPS, setLoadingGPS] = useState(false);
   const navigate = useNavigate();
 
-  
+  const [form, setForm] = useState({
+    fullname: "",
+    primaryPhone: "",
+    backupPhone: "",
+    mainIncidentType: "",
+    specificConditions: [],
+    victimCount: "",
+    availableRescueTools: "",
+    specialNeeds: "",
+    detailDescription: "",
+    landmarkNote: "",
+    images: [],
+  });
 
-  const GOOGLE_API_KEY = "AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao";
-
+  /* ===== GPS ===== */
   const handleGetGPS = () => {
     if (!navigator.geolocation) {
-      alert("Trình duyệt không hỗ trợ GPS");
+      message.error("Trình duyệt không hỗ trợ GPS");
       return;
     }
-  
+
+    setLoadingGPS(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        const { latitude, longitude } = pos.coords;
-  
-        setGps({ lat: latitude, lng: longitude });
-  
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setGps({ lat, lng });
+
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=vi`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=vi`
           );
           const data = await res.json();
-  
-          if (data.display_name) {
-            setAddress(data.display_name);
-          } else {
-            setAddress("Không xác định được địa chỉ");
-          }
-        } catch (err) {
-          setAddress("Không thể lấy địa chỉ từ GPS");
+          setAddress(data.display_name || "Không xác định");
+        } catch {
+          setAddress("Không lấy được địa chỉ");
+        } finally {
+          setLoadingGPS(false);
         }
       },
-      () => alert("Không thể lấy vị trí hiện tại"),
+      () => {
+        message.error("Không lấy được vị trí");
+        setLoadingGPS(false);
+      },
       { enableHighAccuracy: true }
     );
   };
-  
+
+  /* ===== SUBMIT API ===== */
+  const handleSubmit = async () => {
+    if (!gps) {
+      message.error("Vui lòng lấy vị trí GPS");
+      return;
+    }
+    if (!form.mainIncidentType) {
+      message.error("Vui lòng chọn loại sự cố chính");
+      return;
+    }
+    if (!form.specificConditions?.length) {
+      message.error("Vui lòng chọn ít nhất một tình trạng cụ thể");
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append("Fullname", form.fullname.trim());
+    fd.append("PrimaryPhone", form.primaryPhone.trim());
+    if (form.backupPhone?.trim()) fd.append("BackupPhone", form.backupPhone.trim());
+    fd.append("MainIncidentType", form.mainIncidentType);
+    (form.specificConditions || []).forEach((v) => {
+      fd.append("SpecificConditions", v);
+    });
+
+    const victimCount = form.victimCount ? Number(form.victimCount) : "";
+    if (victimCount !== "") fd.append("VictimCount", victimCount);
+    fd.append("AvailableRescueTools", form.availableRescueTools ?? "");
+    fd.append("SpecialNeeds", form.specialNeeds ?? "");
+    fd.append("DetailDescription", form.detailDescription ?? "");
+    fd.append("LandmarkNote", form.landmarkNote ?? "");
+    fd.append("CurrentAddress", address);
+    fd.append("LocationLat", String(gps.lat));
+    fd.append("LocationLng", String(gps.lng));
+    fd.append("AreaId", DEFAULT_AREA_ID);
+
+    (form.images || []).forEach((file) => {
+      const raw = file?.originFileObj ?? file;
+      if (raw instanceof File) fd.append("Images", raw);
+    });
+
+    try {
+      await createRescueRequest(fd);
+      message.success("Gửi yêu cầu cứu trợ thành công");
+      navigate("/map");
+    } catch (err) {
+      const msg = err.response?.data?.title || err.response?.data?.message || err.message || "Gửi yêu cầu thất bại";
+      message.error(msg);
+    }
+  };
+
   
 
   return (
@@ -92,19 +172,32 @@ const EmergencyRequest = () => {
               </h4>
 
               <label>HỌ VÀ TÊN NGƯỜI GỬI *</label>
-              <Input placeholder="Nhập đầy đủ họ tên để đội cứu hộ dễ xưng hô" />
+              <Input
+                placeholder="Họ và tên"
+                onChange={(e) =>
+                  setForm({ ...form, fullname: e.target.value })
+                }
+              />
 
               <div className="form-row">
                 <div>
                   <label>SỐ ĐIỆN THOẠI CHÍNH *</label>
                   <Input
-                    prefix={<PhoneOutlined />}
-                    placeholder="09xx xxx xxx"
-                  />
+                  prefix={<PhoneOutlined />}
+                  placeholder="SĐT chính"
+                  onChange={(e) =>
+                    setForm({ ...form, primaryPhone: e.target.value })
+                  }
+                />
                 </div>
                 <div>
                   <label>SỐ ĐIỆN THOẠI DỰ PHÒNG</label>
-                  <Input placeholder="Người thân hoặc người đi cùng" />
+                  <Input
+                  placeholder="SĐT dự phòng"
+                  onChange={(e) =>
+                    setForm({ ...form, backupPhone: e.target.value })
+                  }
+                />
                 </div>
               </div>
             </div>
@@ -123,26 +216,30 @@ const EmergencyRequest = () => {
   <Select
     className="full-width"
     placeholder="Chọn loại sự cố"
+    value={form.mainIncidentType || undefined}
+    onChange={(v) =>
+      setForm({ ...form, mainIncidentType: v })
+    }
   >
-    <Option value="medical">Y tế khẩn cấp</Option>
-    <Option value="fire">Cháy nổ</Option>
-    <Option value="accident">Tai nạn giao thông</Option>
-    <Option value="flood">Thiên tai / Ngập lụt</Option>
+    {MAIN_INCIDENT_OPTIONS.map((o) => (
+      <Option key={o.value} value={o.value}>{o.label}</Option>
+    ))}
   </Select>
 
-  {/* Tình trạng cụ thể */}
+  {/* Tình trạng cụ thể - theo API: SevereFlood, FireExplosion, Landslide, InjuredPeople, ElderlyOrChildren, PowerOrCommunicationOutage */}
   <label className="field-label mt">
-    TÌNH TRẠNG CỤ THỂ (CHỌN NHANH CÁC MỤC ÁP DỤNG) *
+    TÌNH TRẠNG CỤ THỂ (CHỌN CÁC MỤC ÁP DỤNG) *
   </label>
 
   <div className="checkbox-grid">
-    <Checkbox>Ngập lụt nặng</Checkbox>
-    <Checkbox>Cháy nổ</Checkbox>
-    <Checkbox>Sạt lở</Checkbox>
-
-    <Checkbox>Có người bị thương</Checkbox>
-    <Checkbox>Có người già / trẻ nhỏ</Checkbox>
-    <Checkbox>Mất điện / liên lạc</Checkbox>
+    <Checkbox.Group
+      value={form.specificConditions}
+      onChange={(v) => setForm({ ...form, specificConditions: v })}
+    >
+      {SPECIFIC_CONDITION_OPTIONS.map((o) => (
+        <Checkbox key={o.value} value={o.value}>{o.label}</Checkbox>
+      ))}
+    </Checkbox.Group>
   </div>
 </div>
 
@@ -163,7 +260,11 @@ const EmergencyRequest = () => {
       />
 
       <label>GHI CHÚ ĐIỂM NHẬN DẠNG</label>
-      <Input placeholder="Gần cây đa, đối diện tiệm thuốc..." />
+      <Input
+        placeholder="Gần cây đa, đối diện tiệm thuốc..."
+        value={form.landmarkNote}
+        onChange={(e) => setForm({ ...form, landmarkNote: e.target.value })}
+      />
 
       <Button
   type="primary"
@@ -187,8 +288,8 @@ const EmergencyRequest = () => {
         referrerPolicy="no-referrer-when-downgrade"
         src={
           gps
-            ? `https://www.google.com/maps?q=${gps.lat},${gps.lng}&z=16&output=embed`
-            : `https://www.google.com/maps?q=10.8231,106.6297&z=12&output=embed`
+            ? `${import.meta.env.VITE_GOOGLE_MAP_EMBED}?q=${gps.lat},${gps.lng}&z=16&output=embed`
+            : `${import.meta.env.VITE_GOOGLE_MAP_EMBED}?q=10.8231,106.6297&z=12&output=embed`
         }
         allowFullScreen
       />
@@ -205,19 +306,40 @@ const EmergencyRequest = () => {
               <div className="form-row">
                 <div>
                   <label>SỐ LƯỢNG NGƯỜI GẶP NẠN</label>
-                  <Input placeholder="Ví dụ: 3" />
+                  <Input
+                placeholder="Số người gặp nạn"
+                onChange={(e) =>
+                  setForm({ ...form, victimCount: e.target.value })
+                }
+              />
                 </div>
                 <div>
                   <label>DỤNG CỤ CỨU HỘ HIỆN CÓ</label>
-                  <Input placeholder="Gậy, dây thừng, phao..." />
+                  <Input
+                placeholder="Dụng cụ cứu hộ"
+                onChange={(e) =>
+                  setForm({ ...form, availableRescueTools: e.target.value })
+                }
+              />
                 </div>
               </div>
 
               <label>NHU CẦU ĐẶC BIỆT</label>
-              <Input placeholder="Thuốc men, thực phẩm cho trẻ nhỏ..." />
+              <Input
+                placeholder="Nhu cầu đặc biệt"
+                onChange={(e) =>
+                  setForm({ ...form, specialNeeds: e.target.value })
+                }
+              />
 
               <label>MÔ TẢ CHI TIẾT *</label>
-              <TextArea rows={4} />
+              <TextArea
+                rows={4}
+                placeholder="Mô tả chi tiết"
+                onChange={(e) =>
+                  setForm({ ...form, detailDescription: e.target.value })
+                }
+              />
             </div>
 
             {/* ===== 5 ===== */}
@@ -228,6 +350,10 @@ const EmergencyRequest = () => {
     listType="picture"
     multiple
     className="emergency-upload"
+    beforeUpload={() => false}
+    onChange={({ fileList }) =>
+      setForm({ ...form, images: fileList })
+    }
   >
     <div className="upload-dropzone">
       <UploadOutlined className="upload-icon" />
@@ -242,13 +368,9 @@ const EmergencyRequest = () => {
 </div>
 
 
-<Button
-  className="submit-btn"
-  block
-  onClick={() => navigate("/map")}
->
-  GỬI YÊU CẦU CỨU TRỢ NGAY →
-</Button>
+<Button block className="submit-btn" onClick={handleSubmit}>
+              GỬI YÊU CẦU CỨU TRỢ →
+            </Button>
 
           </section>
 

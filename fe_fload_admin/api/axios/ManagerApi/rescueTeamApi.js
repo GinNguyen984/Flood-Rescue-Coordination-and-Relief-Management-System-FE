@@ -29,3 +29,29 @@ export const deleteTeamMember = (teamId, userId) => {
       },
     });
   };
+  // API mới: Xóa toàn bộ đội cứu hộ
+export const deleteRescueTeam = (teamId) => {
+    return axios.delete(`${API_URL}/api/RescueTeams/${teamId}`, {
+      headers: {
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    });
+  };
+  // API cập nhật thông tin đội cứu hộ
+export const updateRescueTeam = (teamId, data) => {
+    return axios.put(`${API_URL}/api/RescueTeams/${teamId}`, data, {
+      headers: {
+        Accept: "text/plain",
+        "Content-Type": "application/json",
+      },
+    });
+  };
+  export const updateTeamMember = (teamId, userId, data) => {
+    return axios.put(`${API_URL}/api/rescueteams/${teamId}/members/${userId}`, data, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+  };

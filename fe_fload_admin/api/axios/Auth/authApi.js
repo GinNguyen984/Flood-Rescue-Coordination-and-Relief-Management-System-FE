@@ -7,7 +7,7 @@ export const loginApi = ({ phone, password }) => {
     `${API_URL}/api/User/login`,
     {
       phone: phone.trim(),
-      password: password.trim(),
+      password: password.trim(), // Loại bỏ khoảng trắng thừa nếu có
     },
     {
       headers: {

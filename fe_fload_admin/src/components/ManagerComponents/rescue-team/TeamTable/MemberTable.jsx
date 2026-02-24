@@ -16,7 +16,18 @@ export default function MemberTable({ teamId }) {
     try {
       setLoading(true);
       const response = await getRescueTeamMembers(teamId);
-      setMembers(response.data);
+      const data = response.data;
+
+      if (Array.isArray(data)) {
+        setMembers(data);
+      } else if (Array.isArray(data?.data)) {
+        setMembers(data.data);
+      } else if (Array.isArray(data?.items)) {
+        setMembers(data.items);
+      } else {
+        console.error("API không trả về mảng:", data);
+        setMembers([]);
+      }
     } catch (error) {
       console.error('Lỗi khi lấy danh sách thành viên:', error);
       message.error('Không thể tải danh sách thành viên đội.');

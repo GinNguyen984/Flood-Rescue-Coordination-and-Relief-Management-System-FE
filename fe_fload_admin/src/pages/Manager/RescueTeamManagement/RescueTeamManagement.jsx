@@ -25,7 +25,18 @@ export default function RescueTeamManagement() {
       try {
         setLoading(true);
         const response = await getAllRescueTeams();
-        setTeams(response.data);
+        const data = response.data;
+
+        if (Array.isArray(data)) {
+          setTeams(data);
+        } else if (Array.isArray(data?.data)) {
+          setTeams(data.data);
+        } else if (Array.isArray(data?.items)) {
+          setTeams(data.items);
+        } else {
+          console.error("API không trả về mảng:", data);
+          setTeams([]);
+        }
       } catch (error) {
         console.error('Lỗi khi lấy danh sách đội cứu hộ:', error);
         message.error('Không thể tải danh sách đội cứu hộ. Vui lòng thử lại sau.');

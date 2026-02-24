@@ -6,7 +6,7 @@ import RequireAuth from "./PrivateRoute";
 /* ================= ADMIN ================= */
 import UserManagement from "../pages/Admin/UserManagement/UserManagement";
 import SystemSetting from "../pages/Admin/Setting/SystemSetting";
-import Logs from "../pages/Admin/Logs/Logs";
+import Logs from "../pages/Admin/Logs/LogsChange";
 import Permissions from "../pages/Admin/Permissions/Permissions";
 
 

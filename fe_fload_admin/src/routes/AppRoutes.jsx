@@ -5,6 +5,10 @@ import RequireAuth from "./PrivateRoute";
 
 /* ================= ADMIN ================= */
 import UserManagement from "../pages/Admin/UserManagement/UserManagement";
+import SystemSetting from "../pages/Admin/Setting/SystemSetting";
+import Logs from "../pages/Admin/Logs/Logs";
+import Permissions from "../pages/Admin/Permissions/Permissions";
+
 
 /* ================= MANAGER ================= */
 import DashboardOverview from "../pages/Manager/Dashboard/DashboardOverview";
@@ -57,6 +61,9 @@ export default function AppRoutes() {
       >
         <Route index element={<Navigate to="user" replace />} />
         <Route path="user" element={<UserManagement />} />
+        <Route path="settings" element={<SystemSetting />} />
+        <Route path="logs" element={<Logs />} />
+        <Route path="permissions" element={<Permissions />} />
       </Route>
 
       {/* ================= MANAGER ================= */}

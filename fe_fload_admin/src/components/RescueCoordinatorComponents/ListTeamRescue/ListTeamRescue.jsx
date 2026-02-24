@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Tag } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
-import "./rc-list-team-rescue.css";
+import "./list-team-rescue-queue.css";
 
 /* ===== MOCK DATA ===== */
 const initialRequests = [
@@ -37,47 +37,46 @@ const timeAgo = (time) => {
 };
 
 export default function ListTeamRescue() {
-  const [data, setData] = useState(initialRequests);
+  const [data] = useState(initialRequests);
   const [, force] = useState(0);
 
-  /* REAL TIME UPDATE */
   useEffect(() => {
     const timer = setInterval(() => force((v) => v + 1), 60000);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <aside className="rc-queue">
-      <div className="rc-queue__header">
+    <aside className="ltr-queue">
+      <div className="ltr-queue__header">
         <div>
           <h3>CHỜ ĐIỀU PHỐI ({data.length})</h3>
-          <span className="rc-queue__sub">
+          <span className="ltr-queue__sub">
             Yêu cầu khẩn cấp cần xử lý ngay
           </span>
         </div>
 
-        <span className="rc-queue__live">REAL-TIME</span>
+        <span className="ltr-queue__live">REAL-TIME</span>
       </div>
 
-      <div className="rc-queue__list">
+      <div className="ltr-queue__list">
         {data.map((item) => (
           <div
             key={item.id}
-            className={`rc-queue__card ${item.level}`}
+            className={`ltr-queue__card ltr-queue__card--${item.level}`}
           >
-            <div className="rc-queue__top">
+            <div className="ltr-queue__top">
               <Tag color="red">{item.tags[0]}</Tag>
               <span>{timeAgo(item.createdAt)}</span>
             </div>
 
             <h4>{item.title}</h4>
 
-            <div className="rc-queue__location">
+            <div className="ltr-queue__location">
               <EnvironmentOutlined />
               {item.location}
             </div>
 
-            <div className="rc-queue__tags">
+            <div className="ltr-queue__tags">
               {item.tags.slice(1).map((t) => (
                 <Tag key={t}>{t}</Tag>
               ))}

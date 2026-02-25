@@ -5,6 +5,10 @@ import RequireAuth from "./PrivateRoute";
 
 /* ================= ADMIN ================= */
 import UserManagement from "../pages/Admin/UserManagement/UserManagement";
+import SystemSetting from "../pages/Admin/Setting/SystemSetting";
+import Logs from "../pages/Admin/Logs/LogsChange";
+import Permissions from "../pages/Admin/Permissions/Permissions";
+
 
 /* ================= MANAGER ================= */
 import DashboardOverview from "../pages/Manager/Dashboard/DashboardOverview";
@@ -17,12 +21,15 @@ import ManagerRescueTeam from "../pages/Manager/RescueTeamManagement/RescueTeamM
 
 /* ================= COORDINATOR ================= */
 import CoordinatorDispatch from "../pages/RescueCoordinator/MissionDispatch/MissionDispatch";
-// import CoordinatorMap from "../pages/Coordinator/Map";
-// import CoordinatorResources from "../pages/Coordinator/Resources";
-// import CoordinatorReports from "../pages/Coordinator/Reports";
+import DispatchMapPage from "../pages/RescueCoordinator/DispatchMapPage/DispatchMapPage";
+import RescueOperationLayout from "../pages/RescueCoordinator/RescueOperationLayout/RescueOperationLayout";
+import RescueReportPage from "../pages/RescueCoordinator/RescueReportPage/RescueReportPage";
 
 /* ================= RESCUE ================= */
 import RescueTask from "../pages/RescueTeam/RescueMission/RescueMission";
+import MissionDetailRescue from "../pages/RescueTeam/RescueMission/MissionDetailRescue";
+import MissionHistory from "../pages/RescueTeam/RescueMission/MissionHistory";
+import MissionInProgress from "../pages/RescueTeam/RescueMission/MissionInProgress";
 // import RescueHistory from "../pages/Rescue/History";
 // import RescueMessages from "../pages/Rescue/Messages";
 // import RescueProfile from "../pages/Rescue/Profile";
@@ -54,6 +61,9 @@ export default function AppRoutes() {
       >
         <Route index element={<Navigate to="user" replace />} />
         <Route path="user" element={<UserManagement />} />
+        <Route path="settings" element={<SystemSetting />} />
+        <Route path="logs" element={<Logs />} />
+        <Route path="permissions" element={<Permissions />} />
       </Route>
 
       {/* ================= MANAGER ================= */}
@@ -86,10 +96,9 @@ export default function AppRoutes() {
         }
       >
       <Route index element={<CoordinatorDispatch />} />
-        {/* <Route index element={<CoordinatorDispatch />} />
-        <Route path="map" element={<CoordinatorMap />} />
-        <Route path="resources" element={<CoordinatorResources />} />
-        <Route path="reports" element={<CoordinatorReports />} /> */}
+      <Route path="dang" element={< DispatchMapPage/>} />
+      <Route path="mina" element={<RescueOperationLayout />} />
+      <Route path="reports" element={<RescueReportPage />} />
       </Route>
 
       {/* ================= RESCUE ================= */}
@@ -102,9 +111,10 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<RescueTask />} />
-        {/* <Route path="history" element={<RescueHistory />} />
-        <Route path="messages" element={<RescueMessages />} />
-        <Route path="profile" element={<RescueProfile />} /> */}
+        <Route path="mission/:id" element={<MissionDetailRescue />} />
+        <Route path="history" element={<MissionHistory />} />
+        <Route path="dangcuho" element={<MissionInProgress />} />
+       
       </Route>
 
       {/* ================= ROOT ================= */}

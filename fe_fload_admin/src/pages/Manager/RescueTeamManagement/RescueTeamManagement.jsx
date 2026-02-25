@@ -1,4 +1,7 @@
-import { Button, Tag } from "antd";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button, Spin, message } from 'antd';
 import {
   FilterOutlined,
   DownloadOutlined,
@@ -6,204 +9,159 @@ import {
   ThunderboltOutlined,
   CoffeeOutlined,
   UserOutlined,
-  SettingOutlined,
-} from "@ant-design/icons";
-import "./RescueTeamManagement.css";
+} from '@ant-design/icons';
+import TeamManagementList from '../../../components/ManagerComponents/rescue-team/TeamTable/TeamManagementList';
+import ScheduleList from '../../../components/ManagerComponents/rescue-team/TeamSchedule/ScheduleList';
+import { getAllRescueTeams } from '../../../../api/axios/ManagerApi/rescueTeamApi'; // ← import hàm api
+import './RescueTeamManagement.css';
 
 export default function RescueTeamManagement() {
+  const [teams, setTeams] = useState([]);
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        setLoading(true);
+        const response = await getAllRescueTeams();
+        const data = response.data;
+
+        if (Array.isArray(data)) {
+          setTeams(data);
+        } else if (Array.isArray(data?.data)) {
+          setTeams(data.data);
+        } else if (Array.isArray(data?.items)) {
+          setTeams(data.items);
+        } else {
+          console.error("API không trả về mảng:", data);
+          setTeams([]);
+        }
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách đội cứu hộ:', error);
+        message.error('Không thể tải danh sách đội cứu hộ. Vui lòng thử lại sau.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeams();
+  }, []);
+
+  // Lọc đội theo trạng thái
+  const getFilteredTeams = () => {
+    if (filterStatus === 'all') return teams;
+    return teams.filter((team) => {
+      const status = team.rcStatus?.toLowerCase();
+      if (filterStatus === 'active') return status === 'on duty';
+      if (filterStatus === 'rest') return status === 'off duty' || status === 'rest';
+      return false;
+    });
+  };
+
+  const getTeamCount = (status) => {
+    if (status === 'all') return teams.length;
+
+    if (status === 'active') {
+      return teams.filter((t) => t.rcStatus?.toLowerCase() === 'on duty').length;
+    }
+    if (status === 'rest') {
+      return teams.filter((t) => {
+        const s = t.rcStatus?.toLowerCase();
+        return s === 'off duty' || s === 'rest';
+      }).length;
+    }
+    return 0;
+  };
+
+  const totalMembers = teams.reduce((sum, team) => sum + (team.members || 0), 0);
+
+  const filteredTeams = getFilteredTeams();
+
+  // Mapping dữ liệu API sang format component con mong đợi
+  const mappedTeams = filteredTeams.map((team) => ({
+    id: team.rcid,
+    name: team.rcName || 'Chưa đặt tên',
+    skill: 'Chưa cập nhật', // API chưa có → để tạm
+    members: team.members || 0, // nếu API có thì dùng, không thì 0
+    status: team.rcStatus === 'on duty' ? 'active' : 'rest',
+    mission: team.mission || '—',
+    phone: team.rcPhone || '—',
+    teamMembers: [], // nếu cần thành viên → gọi API riêng sau
+  }));
+
+  if (loading) {
+    return (
+      <div className="rescue-page" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Spin size="large" tip="Đang tải danh sách đội cứu hộ..." />
+      </div>
+    );
+  }
+
   return (
     <div className="rescue-page">
-      {/* ================= HEADER ================= */}
       <div className="page-header">
         <div>
           <h2>Quản lý Đội cứu hộ</h2>
-          <p>
-            Giám sát và sắp xếp nhân sự cho các đội cứu hộ dưới quyền
-            (UC-M08, UC-M18)
-          </p>
+          <p>Giám sát và sắp xếp nhân sự cho các đội cứu hộ dưới quyền (UC-M08, UC-M18)</p>
         </div>
 
         <div className="header-actions">
-          <Button icon={<FilterOutlined />}>Lọc</Button>
+          <Button icon={<FilterOutlined />}>Lọc nâng cao</Button>
           <Button icon={<DownloadOutlined />}>Xuất báo cáo</Button>
         </div>
       </div>
 
-      {/* ================= STATS ================= */}
       <div className="stat-grid">
-        <StatCard title="TỔNG SỐ ĐỘI" value="12" icon={<TeamOutlined />} />
-        <StatCard
-          title="ĐANG LÀM NHIỆM VỤ"
-          value="08"
-          icon={<ThunderboltOutlined />}
-          green
-        />
-        <StatCard
-          title="ĐANG NGHỈ / DỰ PHÒNG"
-          value="04"
-          icon={<CoffeeOutlined />}
-          gray
-        />
+        <div onClick={() => setFilterStatus('all')} style={{ cursor: 'pointer' }}>
+          <StatCard
+            title="TỔNG SỐ ĐỘI"
+            value={getTeamCount('all')}
+            icon={<TeamOutlined />}
+            active={filterStatus === 'all'}
+          />
+        </div>
+        <div onClick={() => setFilterStatus('active')} style={{ cursor: 'pointer' }}>
+          <StatCard
+            title="ĐANG LÀM NHIỆM VỤ"
+            value={getTeamCount('active')}
+            icon={<ThunderboltOutlined />}
+            green
+            active={filterStatus === 'active'}
+          />
+        </div>
+        <div onClick={() => setFilterStatus('rest')} style={{ cursor: 'pointer' }}>
+          <StatCard
+            title="ĐANG NGHỈ / DỰ PHÒNG"
+            value={getTeamCount('rest')}
+            icon={<CoffeeOutlined />}
+            gray
+            active={filterStatus === 'rest'}
+          />
+        </div>
         <StatCard
           title="NHÂN SỰ SẴN SÀNG"
-          value="156"
+          value={totalMembers}
           icon={<UserOutlined />}
         />
       </div>
 
-      {/* ================= TEAM LIST ================= */}
-      <div className="card">
-        <div className="card-tabs">
-          <span className="active">📋 Danh sách đội cứu hộ (UC-M08)</span>
-          <span>📆 Lịch trình hoạt động (UC-M18)</span>
-        </div>
+      <TeamManagementList 
+        teamsData={mappedTeams}
+        filterStatus={filterStatus}
+      />
 
-        <div className="table-head">
-          <span>TÊN ĐỘI</span>
-          <span>CHUYÊN MÔN CHÍNH</span>
-          <span>THÀNH VIÊN</span>
-          <span>TRẠNG THÁI</span>
-          <span>NHIỆM VỤ HIỆN TẠI</span>
-          <span>HÀNH ĐỘNG</span>
-        </div>
-
-        <TeamRow
-          name="ALPHA TEAM"
-          id="TEAM-01"
-          skill="Cứu hộ đường thủy"
-          members={12}
-          status="active"
-          mission="Sơ tán dân cư vùng B4"
-        />
-
-        <TeamRow
-          name="MED-RESPONSE DELTA"
-          id="TEAM-04"
-          skill="Y tế hiện trường"
-          members={8}
-          status="rest"
-          mission="-"
-        />
-
-        <TeamRow
-          name="TECH-RESCUE K9"
-          id="TEAM-07"
-          skill="Tìm kiếm & Cứu nạn"
-          members={15}
-          status="active"
-          mission="Quét radar khu vực sạt lở"
-        />
-      </div>
-
-      {/* ================= SCHEDULE ================= */}
-      <div className="card">
-        <div className="schedule-header">
-          <div>
-            <h3>Lịch trực Đội cứu hộ (UC-M18)</h3>
-            <p>Sắp xếp ca trực tuần hiện tại: 15/05 - 21/05</p>
-          </div>
-
-          <div className="week-control">
-            <Button>‹</Button>
-            <Button>Tuần này</Button>
-            <Button>›</Button>
-          </div>
-        </div>
-
-        <div className="schedule-grid">
-          <div className="schedule-head">
-            <span>ĐỘI</span>
-            <span>THỨ 2</span>
-            <span>THỨ 3</span>
-            <span>THỨ 4</span>
-            <span>THỨ 5</span>
-            <span>THỨ 6</span>
-            <span>THỨ 7</span>
-            <span>CHỦ NHẬT</span>
-          </div>
-
-          <ScheduleRow
-            team="Alpha Team"
-            data={["Ca sáng", "Ca sáng", "", "Ca đêm", "Ca đêm", "", "Trực ban"]}
-            color="green"
-          />
-
-          <ScheduleRow
-            team="Delta Med"
-            data={["", "Trực viện", "Trực viện", "", "Ca sáng", "Ca chiều", ""]}
-            color="blue"
-          />
-
-          <ScheduleRow
-            team="K9 Rescue"
-            data={[
-              "Dự phòng",
-              "",
-              "Dự phòng",
-              "Huấn luyện",
-              "",
-              "Tuần tra",
-              "Tuần tra",
-            ]}
-            color="orange"
-          />
-        </div>
-      </div>
+      <ScheduleList />
     </div>
   );
 }
 
-/* ================= SUB ================= */
-
-function StatCard({ title, value, icon, green, gray }) {
+function StatCard({ title, value, icon, green, gray, active }) {
   return (
-    <div className={`stat-card ${green ? "green" : ""} ${gray ? "gray" : ""}`}>
+    <div className={`stat-card ${green ? 'green' : ''} ${gray ? 'gray' : ''} ${active ? 'active' : ''}`}>
       <div className="stat-icon">{icon}</div>
       <span>{title}</span>
       <h2>{value}</h2>
-    </div>
-  );
-}
-
-function TeamRow({ name, id, skill, members, status, mission }) {
-  return (
-    <div className="table-row">
-      <div>
-        <strong>{name}</strong>
-        <p>ID: {id}</p>
-      </div>
-
-      <div>{skill}</div>
-
-      <div>{members} nhân viên</div>
-
-      <div>
-        {status === "active" ? (
-          <Tag color="green">ĐANG LÀM NHIỆM VỤ</Tag>
-        ) : (
-          <Tag>ĐANG NGHỈ</Tag>
-        )}
-      </div>
-
-      <div className="mission">{mission}</div>
-
-      <div className="actions">
-        <Button size="small">Điều động</Button>
-        <SettingOutlined />
-      </div>
-    </div>
-  );
-}
-
-function ScheduleRow({ team, data, color }) {
-  return (
-    <div className="schedule-row">
-      <strong>{team}</strong>
-      {data.map((d, i) => (
-        <div key={i} className={`shift ${color}`}>
-          {d}
-        </div>
-      ))}
     </div>
   );
 }

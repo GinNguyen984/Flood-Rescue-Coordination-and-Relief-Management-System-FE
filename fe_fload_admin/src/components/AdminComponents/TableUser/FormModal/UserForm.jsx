@@ -24,7 +24,7 @@ export default function UserForm({ form }) {
     >
 
       <div className="userForm__header">
-        <h3>Tạo người dùng mới</h3>
+        <h3  >Tạo người dùng mới</h3>
         <p>Nhập thông tin để tạo tài khoản hệ thống</p>
       </div>
 

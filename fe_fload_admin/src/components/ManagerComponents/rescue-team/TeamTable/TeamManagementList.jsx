@@ -34,6 +34,7 @@ import axios from "axios";
 import './TeamManagementList.css';
 
 import MemberTable from './MemberTable';
+import CreateTeamModal from '../CreateTeam/CreateTeamModal';
 
 const { Option } = Select;
 
@@ -43,7 +44,7 @@ const { Option } = Select;
  * FREE reverse geocode using OpenStreetMap
  */
 const reverseGeocode = async (location) => {
-
+  
   try {
 
     if (!location) return "Không xác định";
@@ -80,6 +81,8 @@ export default function TeamManagementList({
   teamsData,
   onTeamDeleted,
 }) {
+const [createOpen, setCreateOpen] = useState(false); 
+
 
   const [expandedTeamId, setExpandedTeamId] = useState(null);
 
@@ -98,64 +101,88 @@ export default function TeamManagementList({
   const [loadingLocation, setLoadingLocation] = useState({});
 
 
+  useEffect(() => {
 
+    if (!teamsData?.length) return;
+  
+    teamsData.forEach(team => {
+  
+      fetchTeamLocation(team.id);
+  
+    });
+  
+  }, [teamsData]);
   /**
    * LOAD LOCATION + ADDRESS
    */
   const fetchTeamLocation = async (teamId) => {
 
-    if (teamLocations[teamId]) return;
-
+    // tránh gọi lại nếu đã load
+    if (teamLocations[teamId] !== undefined)
+      return;
+  
     try {
-
+  
       setLoadingLocation(prev => ({
         ...prev,
         [teamId]: true,
       }));
-
-
+  
+  
       const res =
         await getRescueTeamLocation(teamId);
-
+  
+  
       const location =
-        res.data.location;
-
-
+        res?.data?.location || null;
+  
+  
       setTeamLocations(prev => ({
         ...prev,
         [teamId]: location,
       }));
-
-
+  
+  
+      if (!location) {
+  
+        setTeamAddresses(prev => ({
+          ...prev,
+          [teamId]: "Không xác định",
+        }));
+  
+        return;
+  
+      }
+  
+  
       const address =
         await reverseGeocode(location);
-
-
+  
+  
       setTeamAddresses(prev => ({
         ...prev,
-        [teamId]: address,
+        [teamId]: address || "Không xác định",
       }));
-
+  
+  
     }
-
     catch {
-
+  
       setTeamAddresses(prev => ({
         ...prev,
         [teamId]: "Không xác định",
       }));
-
+  
     }
-
     finally {
-
+  
       setLoadingLocation(prev => ({
         ...prev,
         [teamId]: false,
       }));
-
+  
     }
-
+  
   };
 
 
@@ -309,17 +336,14 @@ export default function TeamManagementList({
 
 
         <Button
-
-          icon={<PlusOutlined />}
-
-          type="primary"
-
-        >
-
-          Tạo đội cứu hộ
-
-        </Button>
-
+  icon={<PlusOutlined />}
+  type="primary"
+  onClick={() =>
+    setCreateOpen(true)
+  }
+>
+  Tạo đội cứu hộ
+</Button>
 
       </div>
 
@@ -425,7 +449,19 @@ export default function TeamManagementList({
 
       </div>
 
+      <CreateTeamModal
 
+open={createOpen}
+
+onClose={() =>
+  setCreateOpen(false)
+}
+
+onSuccess={() =>
+  onTeamDeleted?.()
+}
+
+/>
 
       {/* EDIT MODAL */}
       <Modal

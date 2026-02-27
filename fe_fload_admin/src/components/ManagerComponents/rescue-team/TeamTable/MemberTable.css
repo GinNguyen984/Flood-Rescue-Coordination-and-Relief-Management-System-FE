@@ -189,3 +189,46 @@
       flex-wrap: wrap;
     }
   }
+  .member-table-header{
+
+    display:flex;
+    
+    justify-content:space-between;
+    
+    align-items:center;
+    
+    margin-bottom:12px;
+    
+    }
+    
+    .member-table-container{
+    
+    background:#fff;
+    
+    padding:16px;
+    
+    border-radius:8px;
+    
+    margin-top:10px;
+    
+    }
+    
+    .member-row{
+    
+    display:grid;
+    
+    grid-template-columns:
+    
+    80px
+    2fr
+    1.5fr
+    1.5fr
+    150px;
+    
+    padding:10px;
+    
+    border-bottom:1px solid #eee;
+    
+    align-items:center;
+    
+    }

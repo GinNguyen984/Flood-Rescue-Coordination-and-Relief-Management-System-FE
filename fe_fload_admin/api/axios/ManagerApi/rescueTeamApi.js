@@ -1,6 +1,48 @@
 import axiosInstance from "../../axiosInstance";
 
+/**
+ * CREATE MEMBER
+ */
+export const createTeamMember = (teamId, data) => {
 
+  return axiosInstance.post(
+
+    `/api/rescueteams/${teamId}/members`,
+
+    {
+
+      rescueTeamId: teamId,
+
+      userId: data.userId,
+
+      fullName: data.fullName,
+
+      phone: data.phone,
+
+      roleInTeam: data.roleInTeam,
+
+    }
+
+  );
+
+};
+
+
+export const createRescueTeam = (data) => {
+
+  return axiosInstance.post(
+    "/api/RescueTeams",
+    {
+
+      rcName: data.rcName,
+      rcPhone: data.rcPhone,
+      areaId: Number(data.areaId),
+      rcStatus: data.rcStatus,
+
+    }
+  );
+
+};
 /**
  * Lấy tất cả đội cứu hộ
  */

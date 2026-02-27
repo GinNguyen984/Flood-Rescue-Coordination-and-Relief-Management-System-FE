@@ -30,39 +30,64 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
+
     const e = {};
+  
     if (!phone) e.phone = "Nhập số điện thoại";
+  
     if (!password) e.password = "Nhập mật khẩu";
+  
     setErrors(e);
+  
     if (Object.keys(e).length) return;
-
+  
     try {
+  
       const res = await loginApi({ phone, password });
-      const { token, user } = res.data;
-      const role = user.roleName.toLowerCase();
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", role);
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("isAuth", "true");
-
+  
+      console.log("LOGIN RESPONSE:", res);
+  
+      // FIX TOKEN STORAGE
+      localStorage.setItem(
+        "accessToken",
+        res.token
+      );
+  
+      localStorage.setItem(
+        "user",
+        JSON.stringify(res.user)
+      );
+  
+      localStorage.setItem(
+        "role",
+        res.user.roleName.toLowerCase()
+      );
+  
+      localStorage.setItem(
+        "isAuth",
+        "true"
+      );
+  
       AuthNotify.success(
         "Đăng nhập thành công",
-        `Chào mừng ${user.fullName}`
+        `Chào mừng ${res.user.fullName}`
       );
-console.log("User role:",redirectByRole[role]);
+  
+      const role = res.user.roleName.toLowerCase();
+  
       navigate(redirectByRole[role], { replace: true });
-console.log("Navigation triggered to:",role);
-    // delay nhẹ để thấy notify
-    setTimeout(() => {
-      navigate(redirectByRole[role], { replace: true });
-    }, 300);
-
-      // navigate(redirectByRole[role], { replace: true });
-    } catch {
-      AuthNotify.error("Sai số điện thoại hoặc mật khẩu");
-      setErrors({ password: "Sai số điện thoại hoặc mật khẩu" });
+  
     }
+    catch (error) {
+  
+      console.error(error);
+  
+      AuthNotify.error(
+        "Sai số điện thoại hoặc mật khẩu"
+      );
+  
+    }
+  
   };
 
   return (
@@ -131,7 +156,7 @@ console.log("Navigation triggered to:",role);
               fullWidth
               variant="filled"
               type={show ? "text" : "password"}
-              placeholder="••••••••"
+              placeholder="Mật Khẩu"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={!!errors.password}

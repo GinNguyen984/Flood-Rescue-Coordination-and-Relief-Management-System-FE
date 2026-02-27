@@ -1,5 +1,5 @@
 import { useState } from "react";
-import MapHeader from "../../components/MapHeader/MapHeader";
+import MapHeader from "../../Layout/MapHeader/MapHeader";
 import RescueSidebar from "../../components/RescueSidebar/RescueSidebar";
 import "./RescueMap.css";
 

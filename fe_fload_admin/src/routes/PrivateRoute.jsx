@@ -12,8 +12,8 @@ export default function RequireAuth({ children, role }) {
     const redirectByRole = {
       admin: "/admin/user",
       manager: "/manager",
-      coordinator: "/coordinator",
-      rescue: "/rescue",
+      rescuecoordinator: "/coordinator",
+      rescueteam: "/rescueTeam",
     };
 
     return (

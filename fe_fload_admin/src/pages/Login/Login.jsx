@@ -25,8 +25,8 @@ export default function Login() {
   const redirectByRole = {
     admin: "/admin",
     manager: "/manager",
-    coordinator: "/coordinator",
-    rescue: "/rescue",
+    rescueteam: "/rescueTeam",
+    rescuecoordinator: "/coordinator",
   };
 
   const handleLogin = async () => {
@@ -46,18 +46,19 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("isAuth", "true");
 
-       // ✅ THÔNG BÁO THÀNH CÔNG
-       AuthNotify.success(
+      AuthNotify.success(
         "Đăng nhập thành công",
         `Chào mừng ${user.fullName}`
       );
-
+console.log("User role:",redirectByRole[role]);
+      navigate(redirectByRole[role], { replace: true });
+console.log("Navigation triggered to:",role);
     // delay nhẹ để thấy notify
     setTimeout(() => {
       navigate(redirectByRole[role], { replace: true });
     }, 300);
 
-      navigate(redirectByRole[role], { replace: true });
+      // navigate(redirectByRole[role], { replace: true });
     } catch {
       AuthNotify.error("Sai số điện thoại hoặc mật khẩu");
       setErrors({ password: "Sai số điện thoại hoặc mật khẩu" });

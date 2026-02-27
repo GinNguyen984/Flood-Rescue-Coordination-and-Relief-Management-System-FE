@@ -90,7 +90,7 @@ export default function AppRoutes() {
       <Route
         path="/coordinator"
         element={
-          <RequireAuth role="coordinator">
+          <RequireAuth role="rescuecoordinator">
             <MainLayout />
           </RequireAuth>
         }
@@ -103,9 +103,9 @@ export default function AppRoutes() {
 
       {/* ================= RESCUE ================= */}
       <Route
-        path="/rescue"
+        path="/rescueTeam"
         element={
-          <RequireAuth role="rescue">
+          <RequireAuth role="rescueteam">
             <MainLayout />
           </RequireAuth>
         }

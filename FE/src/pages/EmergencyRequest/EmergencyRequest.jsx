@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import EmergencyHeader from "../../components/EmergencyHeader/EmergencyHeader";
-import EmergencyFooter from "../../components/EmergencyFooter/EmergencyFooter";
+import EmergencyHeader from "../../Layout/EmergencyHeader/EmergencyHeader";
+import EmergencyFooter from "../../Layout/EmergencyFooter/EmergencyFooter";
 import EmergencyNotify from "../../utils/EmergencyNotify";
 
 import {
@@ -239,7 +239,7 @@ const EmergencyRequest = () => {
                   />
                   {errors.primaryPhone && <p className="error-message">{errors.messages?.primaryPhone}</p>}
                 </div>
-                <div>
+                {/* <div>
                   <label>SỐ ĐIỆN THOẠI DỰ PHÒNG</label>
                   <Input
                     placeholder="SĐT dự phòng"
@@ -248,7 +248,7 @@ const EmergencyRequest = () => {
                       setForm({ ...form, backupPhone: e.target.value })
                     }
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 

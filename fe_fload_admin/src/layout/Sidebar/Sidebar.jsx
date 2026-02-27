@@ -46,7 +46,7 @@ const menuByRole = {
     { label: "Đội cứu hộ", icon: <UsergroupAddOutlined />, path: "/manager/rescue-team" },
   ],
 
-  coordinator: [
+  rescuecoordinator: [
     { label: "Xác minh yêu cầu", icon: <CheckCircleOutlined />, path: "/coordinator", end: true },
     { label: "Đang điều phối", icon: <GlobalOutlined />, path: "/coordinator/dang" },
     { label: "Đang cứu hộ", icon: <AimOutlined />, path: "/coordinator/mina" },
@@ -54,7 +54,7 @@ const menuByRole = {
     { label: "Tài nguyên", icon: <AppstoreOutlined />, path: "/coordinator/resources" },
   ],
 
-  rescue: [
+  rescueteam: [
     { label: "Nhiệm vụ", icon: <CarryOutOutlined />, path: "/rescue", end: true },
     { label: "Đang cứu hộ", icon: <GlobalOutlined />, path: "/rescue/dangcuho" },
     { label: "Lịch sử", icon: <HistoryOutlined />, path: "/rescue/history" },

@@ -2,10 +2,6 @@
 
 import axiosInstance from "../../axiosInstance";
 
-
-/**
- * REGISTER USER
- */
 export const registerUser = async (data) => {
 
   try {
@@ -34,29 +30,26 @@ export const registerUser = async (data) => {
 
 
 
-/**
- * GET CURRENT USER PROFILE
- * GET /api/User/profile
- */
-export const getUserProfile = async () => {
 
-  try {
+// export const getUserProfile = async () => {
 
-    const response = await axiosInstance.get(
-      "/api/User/profile"
-    );
+//   try {
 
-    return response.data;
+//     const response = await axiosInstance.get(
+//       "/api/User/profile"
+//     );
 
-  } catch (error) {
+//     return response.data;
 
-    console.error("PROFILE ERROR:", error?.response);
+//   } catch (error) {
 
-    throw error?.response?.data || error;
+//     console.error("PROFILE ERROR:", error?.response);
 
-  }
+//     throw error?.response?.data || error;
 
-};
+//   }
+
+// };
 export const getAllUser = async () => {
 
     try {

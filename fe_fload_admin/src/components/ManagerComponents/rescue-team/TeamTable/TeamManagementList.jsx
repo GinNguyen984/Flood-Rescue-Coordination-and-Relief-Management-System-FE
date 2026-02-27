@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import {
   Button,
   Tag,
@@ -11,6 +12,7 @@ import {
   Select,
   Spin,
 } from 'antd';
+
 import {
   PlusOutlined,
   EditOutlined,
@@ -19,250 +21,679 @@ import {
   UpOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
+
 import {
   deleteRescueTeam,
   updateRescueTeam,
-} from '../../../../../api/axios/ManagerApi/rescueTeamApi'; // điều chỉnh đường dẫn nếu cần
+  getRescueTeamLocation,
+  updateRescueTeamLocation,
+} from '../../../../../api/axios/ManagerApi/rescueTeamApi';
+
+import axios from "axios";
+
 import './TeamManagementList.css';
+
 import MemberTable from './MemberTable';
 
 const { Option } = Select;
 
-export default function TeamManagementList({ teamsData, filterStatus, onTeamDeleted }) {
+
+
+/**
+ * FREE reverse geocode using OpenStreetMap
+ */
+const reverseGeocode = async (location) => {
+
+  try {
+
+    if (!location) return "Không xác định";
+
+    const [lng, lat] = location.split(",");
+
+    if (!lng || !lat) return "Không xác định";
+
+    const res = await axios.get(
+      "https://nominatim.openstreetmap.org/reverse",
+      {
+        params: {
+          lat: lat,
+          lon: lng,
+          format: "json"
+        }
+      }
+    );
+
+    return res.data.display_name || "Không xác định";
+
+  }
+  catch {
+
+    return "Không xác định";
+
+  }
+
+};
+
+
+
+export default function TeamManagementList({
+  teamsData,
+  onTeamDeleted,
+}) {
+
   const [expandedTeamId, setExpandedTeamId] = useState(null);
+
   const [editModalVisible, setEditModalVisible] = useState(false);
+
   const [editingTeam, setEditingTeam] = useState(null);
+
   const [form] = Form.useForm();
+
   const [updating, setUpdating] = useState(false);
 
+  const [teamLocations, setTeamLocations] = useState({});
+
+  const [teamAddresses, setTeamAddresses] = useState({});
+
+  const [loadingLocation, setLoadingLocation] = useState({});
+
+
+
+  /**
+   * LOAD LOCATION + ADDRESS
+   */
+  const fetchTeamLocation = async (teamId) => {
+
+    if (teamLocations[teamId]) return;
+
+    try {
+
+      setLoadingLocation(prev => ({
+        ...prev,
+        [teamId]: true,
+      }));
+
+
+      const res =
+        await getRescueTeamLocation(teamId);
+
+      const location =
+        res.data.location;
+
+
+      setTeamLocations(prev => ({
+        ...prev,
+        [teamId]: location,
+      }));
+
+
+      const address =
+        await reverseGeocode(location);
+
+
+      setTeamAddresses(prev => ({
+        ...prev,
+        [teamId]: address,
+      }));
+
+    }
+
+    catch {
+
+      setTeamAddresses(prev => ({
+        ...prev,
+        [teamId]: "Không xác định",
+      }));
+
+    }
+
+    finally {
+
+      setLoadingLocation(prev => ({
+        ...prev,
+        [teamId]: false,
+      }));
+
+    }
+
+  };
+
+
+
+  /**
+   * EXPAND TEAM
+   */
   const handleTeamClick = (teamId) => {
-    setExpandedTeamId(expandedTeamId === teamId ? null : teamId);
-  };
-// Mở modal sửa đội
-const handleEditTeam = (team) => {
-  setEditingTeam(team);
-  form.setFieldsValue({
-    rcName: team.name || '',
-    rcPhone: team.phone || '',
-    areaId: team.areaId || 1,          // ← FIX: mặc định areaId = 1 thay vì 0
-    rcStatus: team.status === 'active' ? 'on duty' : 'rest',
-  });
-  setEditModalVisible(true);
-};
 
-// Xử lý submit form sửa đội
-const handleUpdateTeam = async (values) => {
-  if (!editingTeam) return;
+    fetchTeamLocation(teamId);
 
-  setUpdating(true);
-  try {
-    const payload = {
-      rcName: values.rcName,
-      rcPhone: values.rcPhone,
-      areaId: Number(values.areaId) || 1,  // ← Đảm bảo là number và mặc định 1
-      rcStatus: values.rcStatus,
-    };
-
-    console.log('Payload PUT:', payload); // Để debug
-
-    await updateRescueTeam(editingTeam.id, payload);
-    message.success(`Cập nhật đội ${values.rcName} thành công!`);
-
-    setEditModalVisible(false);
-    form.resetFields();
-
-    if (onTeamDeleted) onTeamDeleted();
-  } catch (error) {
-    console.error('Lỗi PUT:', error.response?.data || error.message);
-    message.error(
-      error.response?.data?.message || 'Cập nhật đội thất bại. Vui lòng thử lại.'
+    setExpandedTeamId(
+      expandedTeamId === teamId
+        ? null
+        : teamId
     );
-  } finally {
-    setUpdating(false);
-  }
-};
-  // Xử lý xóa đội (đã có từ trước)
-  const handleDeleteTeam = (teamId, teamName) => {
-    Modal.confirm({
-      title: 'Xác nhận xóa đội cứu hộ',
-      icon: <ExclamationCircleOutlined />,
-      content: `Bạn có chắc chắn muốn xóa đội "${teamName}" (ID: ${teamId})? Hành động này không thể hoàn tác.`,
-      okText: 'Xóa',
-      okType: 'danger',
-      cancelText: 'Hủy',
-      onOk: async () => {
-        try {
-          await deleteRescueTeam(teamId);
-          message.success(`Đã xóa đội ${teamName} thành công!`);
-          if (onTeamDeleted) onTeamDeleted();
-        } catch (error) {
-          console.error('Lỗi khi xóa đội:', error);
-          message.error('Xóa đội thất bại. Vui lòng thử lại.');
-        }
-      },
-    });
+
   };
+
+
+
+  /**
+   * OPEN EDIT
+   */
+  const handleEditTeam = (team) => {
+
+    setEditingTeam(team);
+
+    form.setFieldsValue({
+
+      rcName: team.name,
+
+      rcPhone: team.phone,
+
+      areaId: team.areaId,
+
+      rcStatus: team.status,
+
+      location: teamLocations[team.id] || ""
+
+    });
+
+    setEditModalVisible(true);
+
+  };
+
+
+
+  /**
+   * UPDATE TEAM
+   */
+  const handleUpdateTeam = async (values) => {
+
+    try {
+
+      setUpdating(true);
+
+
+      await updateRescueTeam(
+        editingTeam.id,
+        {
+          rcName: values.rcName,
+          rcPhone: values.rcPhone,
+          areaId: values.areaId,
+          rcStatus: values.rcStatus,
+        }
+      );
+
+
+      if (values.location) {
+
+        await updateRescueTeamLocation(
+          editingTeam.id,
+          values.location
+        );
+
+      }
+
+
+      message.success("Cập nhật thành công");
+
+
+      setEditModalVisible(false);
+
+
+      onTeamDeleted?.();
+
+
+    }
+    catch {
+
+      message.error("Cập nhật thất bại");
+
+    }
+    finally {
+
+      setUpdating(false);
+
+    }
+
+  };
+
+
+
+  /**
+   * DELETE TEAM
+   */
+  const handleDeleteTeam = (teamId, teamName) => {
+
+    Modal.confirm({
+
+      title: "Xác nhận xóa đội",
+
+      icon:
+        <ExclamationCircleOutlined />,
+
+      content:
+        `Bạn có chắc muốn xóa đội "${teamName}"?`,
+
+      okType: "danger",
+
+      onOk: async () => {
+
+        await deleteRescueTeam(teamId);
+
+        message.success("Đã xóa đội");
+
+        onTeamDeleted?.();
+
+      },
+
+    });
+
+  };
+
+
 
   return (
+
     <div className="card">
+
+
+      {/* HEADER */}
       <div className="card-header">
-        <div>
-          <span className="active">📋 Danh sách đội cứu hộ ({teamsData.length})</span>
-        </div>
-        <div className="header-actions">
-          <Button icon={<PlusOutlined />} type="primary">
-            Tạo Đội Cứu Hộ
-          </Button>
-        </div>
-      </div>
 
-      <div className="table-wrapper">
-        <div className="table-head">
-          <span>TÊN ĐỘI</span>
-          <span>CHUYÊN MÔN CHÍNH</span>
-          <span>THÀNH VIÊN</span>
-          <span>TRẠNG THÁI</span>
-          <span>NHIỆM VỤ HIỆN TẠI</span>
-          <span>HÀNH ĐỘNG</span>
-        </div>
+        <span className="card-title">
 
-        {teamsData.map((team) => (
-          <div key={team.id}>
-            <TeamRow
-              {...team}
-              isExpanded={expandedTeamId === team.id}
-              onTeamClick={() => handleTeamClick(team.id)}
-              onEdit={() => handleEditTeam(team)}
-              onDelete={() => handleDeleteTeam(team.id, team.name)}
-            />
-            {expandedTeamId === team.id && (
-              <MemberTable teamId={team.id} />
-            )}
-          </div>
-        ))}
-      </div>
+          📋 Danh sách đội cứu hộ ({teamsData.length})
 
-      {/* Modal chỉnh sửa đội */}
-      <Modal
-        title="Chỉnh sửa thông tin đội cứu hộ"
-        open={editModalVisible}
-        onCancel={() => {
-          setEditModalVisible(false);
-          form.resetFields();
-        }}
-        footer={null}
-        width={600}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleUpdateTeam}
+        </span>
+
+
+        <Button
+
+          icon={<PlusOutlined />}
+
+          type="primary"
+
         >
+
+          Tạo đội cứu hộ
+
+        </Button>
+
+
+      </div>
+
+
+
+      {/* TABLE HEAD */}
+      <div className="table-wrapper">
+
+
+        <div className="table-head">
+
+          <span>STT</span>
+
+          <span>TÊN ĐỘI</span>
+
+          <span>Số Điện Thoại</span>
+
+          <span>TRẠNG THÁI</span>
+
+          <span>VỊ TRÍ</span>
+
+          <span>HÀNH ĐỘNG</span>
+
+        </div>
+
+
+
+        {/* TABLE BODY */}
+        {
+
+          teamsData.map(
+
+            (team, index) => (
+
+              <div key={team.id}>
+
+                <TeamRow
+
+                  index={index}
+
+                  {...team}
+
+                  location={
+                    teamLocations[team.id]
+                  }
+
+                  address={
+                    teamAddresses[team.id]
+                  }
+
+                  loadingLocation={
+                    loadingLocation[team.id]
+                  }
+
+                  isExpanded={
+                    expandedTeamId === team.id
+                  }
+
+                  onTeamClick={
+                    () =>
+                      handleTeamClick(team.id)
+                  }
+
+                  onEdit={
+                    () =>
+                      handleEditTeam(team)
+                  }
+
+                  onDelete={
+                    () =>
+                      handleDeleteTeam(
+                        team.id,
+                        team.name
+                      )
+                  }
+
+                />
+
+
+                {
+
+                  expandedTeamId === team.id
+
+                  && (
+
+                    <MemberTable
+                      teamId={team.id}
+                    />
+
+                  )
+
+                }
+
+
+              </div>
+
+            )
+
+          )
+
+        }
+
+
+      </div>
+
+
+
+      {/* EDIT MODAL */}
+      <Modal
+
+        open={editModalVisible}
+
+        title="Chỉnh sửa đội cứu hộ"
+
+        footer={null}
+
+        onCancel={() =>
+          setEditModalVisible(false)
+        }
+
+      >
+
+
+        <Form
+
+          form={form}
+
+          layout="vertical"
+
+          onFinish={handleUpdateTeam}
+
+        >
+
+
           <Form.Item
             name="rcName"
             label="Tên đội"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đội!' }]}
+            required
           >
-            <Input placeholder="Nhập tên đội" />
+            <Input />
           </Form.Item>
+
 
           <Form.Item
             name="rcPhone"
-            label="Số điện thoại liên lạc"
-            rules={[
-              { required: true, message: 'Vui lòng nhập số điện thoại!' },
-              { pattern: /^[0-9]{9,11}$/, message: 'Số điện thoại không hợp lệ!' },
-            ]}
+            label="Phone"
+            required
           >
-            <Input placeholder="Ví dụ: 0901234567" />
+            <Input />
           </Form.Item>
+
 
           <Form.Item
             name="areaId"
-            label="Khu vực phụ trách (Area ID)"
+            label="Area ID"
           >
-            <Input type="number" placeholder="Nhập ID khu vực (nếu có)" />
+            <Input type="number"/>
           </Form.Item>
+
 
           <Form.Item
             name="rcStatus"
-            label="Trạng thái đội"
-            rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+            label="Status"
           >
-            <Select placeholder="Chọn trạng thái">
-              <Option value="on duty">Đang làm nhiệm vụ</Option>
-              <Option value="rest">Đang nghỉ</Option>
-              <Option value="off duty">Tạm nghỉ</Option>
+
+            <Select>
+
+              <Option value="active">
+                Active
+              </Option>
+
+              <Option value="rest">
+                Rest
+              </Option>
+
             </Select>
+
           </Form.Item>
 
-          <Form.Item style={{ textAlign: 'right', marginTop: 24 }}>
-            <Button
-              onClick={() => setEditModalVisible(false)}
-              style={{ marginRight: 12 }}
-            >
-              Hủy
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={updating}
-              disabled={updating}
-            >
-              Lưu thay đổi
-            </Button>
+
+          <Form.Item
+            name="location"
+            label="Location (lng,lat)"
+          >
+            <Input
+              placeholder="106.699018,10.779783"
+            />
           </Form.Item>
+
+
+          <Button
+
+            type="primary"
+
+            htmlType="submit"
+
+            loading={updating}
+
+            block
+
+          >
+
+            Lưu thay đổi
+
+          </Button>
+
+
         </Form>
+
+
       </Modal>
+
+
     </div>
+
   );
+
 }
 
-function TeamRow({ id, name, skill, members, status, mission, isExpanded, onTeamClick, onEdit, onDelete }) {
+
+
+/**
+ * TEAM ROW
+ */
+function TeamRow({
+
+  index,
+
+  id,
+
+  name,
+  phone,
+
+  skill,
+
+  status,
+
+  location,
+
+  address,
+
+  loadingLocation,
+
+  isExpanded,
+
+  onTeamClick,
+
+  onEdit,
+
+  onDelete,
+
+}) {
+
   return (
+
     <div className="table-row">
-      <div className="team-info">
-        <button className="expand-btn" onClick={onTeamClick}>
-          {isExpanded ? <UpOutlined /> : <DownOutlined />}
-        </button>
-        <div>
-          <strong>{name}</strong>
-        </div>
-      </div>
 
-      <div>{skill || '—'}</div>
 
-      <div>{members || 0} nhân viên</div>
-
+      {/* STT */}
       <div>
-        {status === 'active' ? (
-          <Tag color="green">ĐANG LÀM NHIỆM VỤ</Tag>
-        ) : (
-          <Tag color="default">ĐANG NGHỈ</Tag>
-        )}
+
+        {index + 1}
+
       </div>
 
-      <div className="mission">{mission || '—'}</div>
 
-      <div className="actions">
+
+      {/* NAME */}
+      <div className="team-info">
+
+        <button
+          onClick={onTeamClick}
+        >
+
+          {
+
+            isExpanded
+            ? <UpOutlined/>
+            : <DownOutlined/>
+
+          }
+
+        </button>
+
+
+        <strong>
+
+          {name}
+
+        </strong>
+
+      </div>
+
+
+
+      {/* SKILL */}
+      <div>
+
+        {phone}
+
+      </div>
+
+
+
+      {/* STATUS */}
+      <div>
+
+        <Tag
+
+          color={
+            status === "active"
+            ? "green"
+            : "default"
+          }
+
+        >
+
+          {status}
+
+        </Tag>
+
+      </div>
+
+
+
+      {/* LOCATION */}
+      <div>
+
+        {
+
+          loadingLocation
+
+          ? <Spin size="small"/>
+
+          : address
+
+          ? address
+
+          : "Không xác định"
+
+        }
+
+      </div>
+
+
+
+      {/* ACTION */}
+      <div>
+
         <Button
-          size="small"
-          type="text"
+
           icon={<EditOutlined />}
+
           onClick={onEdit}
-        >
-          Sửa
-        </Button>
+
+        />
+
+
         <Button
-          size="small"
-          type="text"
+
           danger
+
           icon={<DeleteOutlined />}
+
           onClick={onDelete}
-        >
-          Xóa
-        </Button>
+
+        />
+
+
       </div>
+
+
     </div>
+
   );
+
 }

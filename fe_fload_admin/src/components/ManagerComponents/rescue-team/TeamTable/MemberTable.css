@@ -109,7 +109,7 @@
   
   .actions-cell {
     display: flex;
-    gap: 8px;
+    gap: 3px;
     justify-content: flex-end;
     flex-wrap: wrap;
   }

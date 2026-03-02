@@ -26,7 +26,7 @@ export default function Login() {
     admin: "/admin",
     manager: "/manager",
     rescueteam: "/rescueTeam",
-    rescuecoordinator: "/coordinator",
+    coordinator: "/coordinator",
   };
 
   const handleLogin = async () => {

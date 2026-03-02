@@ -164,7 +164,7 @@ const menuByRole = {
   ],
 
 
-  rescuecoordinator: [
+  coordinator: [
 
     {
 

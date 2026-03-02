@@ -204,13 +204,13 @@ function HistoryCard({ data, onEdit }) {
         📞 {data.phone}
       </div>
 
-      {data.image && (
+      {/* {data.image && (
         <img
           src={`http://localhost:8080${data.image}`}
           alt="rescue"
           className="history-image"
         />
-      )}
+      )} */}
 
       <div className="history-action">
         {isProcessing ? (

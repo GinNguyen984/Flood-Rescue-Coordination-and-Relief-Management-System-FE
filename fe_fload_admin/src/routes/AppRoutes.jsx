@@ -90,7 +90,7 @@ export default function AppRoutes() {
       <Route
         path="/coordinator"
         element={
-          <RequireAuth role="rescuecoordinator">
+          <RequireAuth role="coordinator">
             <MainLayout />
           </RequireAuth>
         }

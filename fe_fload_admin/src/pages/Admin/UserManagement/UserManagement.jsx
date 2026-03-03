@@ -66,21 +66,16 @@ export default function UserManagement() {
       const mappedUsers = validUsers.map(user => ({
 
         id: user.userId,
-
         name: user.fullName,
-
         phone: user.phone,
-
         role: user.roleName,
-
-        area: user.areaId ? `Area ${user.areaId}` : "N/A",
-
-        status: "Hoạt động",
-
+      
+        areaId: user.areaId, // 🔥 QUAN TRỌNG
+      
+        status: user.status || "Hoạt động",
         raw: user,
-
+      
       }));
-
       setUsers(mappedUsers);
 
     }

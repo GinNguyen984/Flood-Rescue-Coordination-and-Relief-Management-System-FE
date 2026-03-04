@@ -8,6 +8,7 @@ import {
   Input,
   Select,
   Spin,
+  Pagination
 } from 'antd';
 
 import {
@@ -30,10 +31,10 @@ import './TeamManagementList.css';
 import MemberTable from './MemberTable';
 import CreateTeamModal from '../CreateTeam/CreateTeamModal';
 
-/* ✅ Custom Notify */
 import AuthNotify from "../../../../utils/Common/AuthNotify";
 
-/* ✅ MUI */
+/* MUI */
+
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
@@ -98,6 +99,19 @@ export default function TeamManagementList({
   const [loadingLocation, setLoadingLocation] = useState({});
 
   const [provinces, setProvinces] = useState([]);
+
+  /* PAGINATION */
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 7;
+
+  const startIndex = (currentPage - 1) * pageSize;
+
+  const paginatedTeams =
+    teamsData.slice(
+      startIndex,
+      startIndex + pageSize
+    );
 
 
   useEffect(() => {
@@ -266,9 +280,7 @@ export default function TeamManagementList({
       onTeamChanged?.();
 
     }
-    catch (err) {
-
-      console.log("Update error:", err);
+    catch {
 
       AuthNotify.error(
         "Cập nhật thất bại",
@@ -367,15 +379,19 @@ export default function TeamManagementList({
         </div>
 
 
-        {teamsData.map((team, index) => (
+        {paginatedTeams.map((team, index) => (
 
           <div key={team.id}>
 
             <div className="table-row">
 
-              <div className="col-center">{index + 1}</div>
+              <div className="col-center">
+                {startIndex + index + 1}
+              </div>
 
-              <div className="team-name">{team.name}</div>
+              <div className="team-name">
+                {team.name}
+              </div>
 
               <div>{team.phone}</div>
 
@@ -456,6 +472,22 @@ export default function TeamManagementList({
         ))}
 
       </div>
+
+
+      {/* PAGINATION */}
+
+      <div className="table-pagination">
+
+        <Pagination
+          current={currentPage}
+          pageSize={pageSize}
+          total={teamsData.length}
+          onChange={(page) => setCurrentPage(page)}
+          showSizeChanger={false}
+        />
+
+      </div>
+
 
       <CreateTeamModal
         open={createOpen}

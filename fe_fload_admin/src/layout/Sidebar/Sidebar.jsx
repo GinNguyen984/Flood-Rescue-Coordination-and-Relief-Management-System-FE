@@ -1,35 +1,34 @@
+'use client';
+
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LogoutOutlined,
-
-  /* ADMIN */
   TeamOutlined,
   SettingOutlined,
   SafetyOutlined,
   FileTextOutlined,
-
-  /* MANAGER */
   AppstoreOutlined,
   InboxOutlined,
   CheckSquareOutlined,
   UsergroupAddOutlined,
   CarOutlined,
-
-  /* RESCUE */
   CarryOutOutlined,
   HistoryOutlined,
   MessageOutlined,
   UserOutlined,
-
-  /* COORDINATOR */
   CheckCircleOutlined,
   GlobalOutlined,
   AimOutlined,
   BarChartOutlined,
 } from "@ant-design/icons";
+
+import { useState, useEffect } from "react";
+import { getUserProfile } from "../../../api/axios/Auth/authApi";
+import UserProfileModal from "../../components/UserComponents/UserProfileModal";
 import "./Sidebar.css";
 
 /* ================= MENU BY ROLE ================= */
+
 const menuByRole = {
   admin: [
     { label: "Quản lý người dùng", icon: <TeamOutlined />, path: "/admin/user", end: true },
@@ -54,65 +53,91 @@ const menuByRole = {
     { label: "Tài nguyên", icon: <AppstoreOutlined />, path: "/coordinator/resources" },
   ],
 
-  rescue: [
-    { label: "Nhiệm vụ", icon: <CarryOutOutlined />, path: "/rescue", end: true },
-    { label: "Đang cứu hộ", icon: <GlobalOutlined />, path: "/rescue/dangcuho" },
-    { label: "Lịch sử", icon: <HistoryOutlined />, path: "/rescue/history" },
-    { label: "Tin nhắn", icon: <MessageOutlined />, path: "/rescue/messages", badge: 3 },
-    { label: "Cá nhân", icon: <UserOutlined />, path: "/rescue/profile" },
+  rescueteam: [
+    { label: "Nhiệm vụ", icon: <CarryOutOutlined />, path: "/rescueTeam", end: true },
+    { label: "Đang cứu hộ", icon: <GlobalOutlined />, path: "/rescueTeam/dangcuho" },
+    { label: "Lịch sử", icon: <HistoryOutlined />, path: "/rescueTeam/history" },
+    { label: "Tin nhắn", icon: <MessageOutlined />, path: "/rescueTeam/messages" },
+    { label: "Cá nhân", icon: <UserOutlined />, path: "/rescueTeam/profile" },
   ],
 };
 
 export default function Sidebar() {
-  const navigate = useNavigate();
 
-  /* ===== LẤY USER TỪ API LOGIN ===== */
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const role = (localStorage.getItem("role") || "admin").toLowerCase();
+  const navigate = useNavigate();
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  /* ================= USER ================= */
+
+  const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+  const role = (sessionStorage.getItem("role") || user.roleName || "admin").toLowerCase();
+
+  const roleName = user.roleName || role;
   const menus = menuByRole[role] || [];
 
-  const fullName = user.fullName || "Unknown User";
-  const roleName = user.roleName || role;
+  /* ================= PROFILE ================= */
 
-  /* Avatar = 2 ký tự đầu tên */
-  const avatarText = fullName
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const [userProfile, setUserProfile] = useState({
+    fullName: "Loading...",
+    roleName: "",
+  });
+
+  const loadProfile = async () => {
+    try {
+      const data = await getUserProfile();
+      setUserProfile(data);
+    } catch {
+      console.error("Load profile failed");
+    }
+  };
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const avatarText =
+    userProfile.fullName
+      ?.split(" ")
+      ?.map((w) => w[0])
+      ?.slice(0, 2)
+      ?.join("")
+      ?.toUpperCase() || "U";
+
+  /* ================= LOGOUT ================= */
 
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear();
     navigate("/login", { replace: true });
   };
 
   return (
     <aside className="sidebar">
-      {/* ================= MENU ================= */}
+
       <nav className="sidebar-menu">
         {menus.map((item, index) => (
           <NavLink
             key={index}
             to={item.path}
             end={item.end}
-            className={({ isActive }) =>
-              `menu-item ${isActive ? "active" : ""}`
-            }
+            className={({ isActive }) => `menu-item ${isActive ? "active" : ""}`}
           >
             <span className="menu-icon">{item.icon}</span>
             <span className="menu-label">{item.label}</span>
-            {item.badge && <span className="menu-badge">{item.badge}</span>}
           </NavLink>
         ))}
       </nav>
 
-      {/* ================= FOOTER ================= */}
       <div className="sidebar-footer">
-        <div className="user-info">
+
+        <div
+          className="user-info"
+          onClick={() => setProfileOpen(true)}
+          style={{ cursor: "pointer" }}
+        >
           <div className="avatar">{avatarText}</div>
+
           <div>
-            <strong>{fullName}</strong>
+            <strong>{userProfile.fullName}</strong>
             <p>{roleName}</p>
           </div>
         </div>
@@ -121,7 +146,17 @@ export default function Sidebar() {
           <LogoutOutlined />
           <span>Đăng xuất</span>
         </button>
+
       </div>
+
+      <UserProfileModal
+        open={profileOpen}
+        onClose={() => {
+          setProfileOpen(false);
+          loadProfile();
+        }}
+      />
+
     </aside>
   );
 }

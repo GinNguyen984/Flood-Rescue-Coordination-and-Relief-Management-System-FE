@@ -11,7 +11,7 @@ import {
   EditOutlined,
 } from "@ant-design/icons";
 
-import "./UserManagement.css";
+import "./userManagement.css";
 
 import UserTable from "../../../components/AdminComponents/TableUser/UserListManager/UserTable";
 import UserFormModal from "../../../components/AdminComponents/TableUser/FormModal/UserFormModal";

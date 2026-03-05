@@ -1,216 +1,269 @@
 import { Button, Input, Image } from "antd";
 import { useState } from "react";
+import { PhoneOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-import { PhoneOutlined } from "@ant-design/icons";
 import "./MissionDetail.css";
 
-export default function MissionDetail() {
+const IMAGE_BASE = "https://api-rescue.purintech.id.vn";
+
+export default function MissionDetail({ mission }) {
+
   const [priority, setPriority] = useState(null);
   const navigate = useNavigate();
 
+  if (!mission) {
+    return (
+      <div style={{ padding: 40 }}>
+        Chọn yêu cầu bên trái
+      </div>
+    );
+  }
+
+  /* FIX IMAGE FIELD (KHÔNG ĐỔI LOGIC) */
+  const images = mission.imageUrls || mission.images || [];
+
   return (
     <section className="rc-md">
-      {/* ================= HEADER ================= */}
+
+      {/* HEADER */}
       <header className="rc-md__header">
+
         <div className="rc-md__header-info">
+
           <h2 className="request-title">
-            Yêu cầu #1234
+            Yêu cầu #{mission.id}
+
             <span className="status status-pending">
               CHỜ XÁC MINH
             </span>
+
           </h2>
 
           <p className="request-meta">
-            Tiếp nhận lúc 14:30 · Qua Hệ Thống Cứu Hộ Việt Nam
+            Tiếp nhận lúc {new Date(mission.createdAt).toLocaleString()}
           </p>
+
         </div>
 
         <Button
           icon={<PhoneOutlined />}
           className="call-btn rc-md__action-call"
+          href={`tel:${mission.phone}`}
         >
           GỌI XÁC MINH
         </Button>
+
       </header>
 
       <div className="divider" />
 
-      {/* ================= CONTENT GRID ================= */}
       <div className="detail-grid rc-md__content">
 
-        {/* ========== LEFT COLUMN ========== */}
-        <div className="left-col rc-md__column rc-md__column-left">
+        {/* LEFT */}
+        <div className="left-col">
 
-          {/* --- SECTION: CITIZEN INFO --- */}
-          <section className="card rc-md__section rc-md__section-citizen">
+          <section className="card">
+
             <h4 className="card-title">👤 THÔNG TIN NGƯỜI DÂN</h4>
 
             <div className="info-row">
+
               <div className="info-item">
                 <label>HỌ VÀ TÊN</label>
-                <strong>Nguyễn Văn An</strong>
+                <strong>{mission.name}</strong>
               </div>
 
               <div className="info-item">
                 <label>SỐ ĐIỆN THOẠI</label>
-                <strong className="phone">
-                  090 123 4567
-                </strong>
+                <strong className="phone">{mission.phone}</strong>
               </div>
+
             </div>
 
             <label>ĐỊA CHỈ HIỆN TẠI</label>
+
             <p className="address-text">
-              123 Nguyễn Huệ, Phường Đa Kao,
-              Quận 1, TP.HCM
+              {mission.location}
             </p>
+
           </section>
 
-          {/* --- SECTION: EMERGENCY STATUS --- */}
-          <section className="card rc-md__section rc-md__section-status">
-            <h4 className="card-title">📋 TÌNH TRẠNG KHẨN CẤP</h4>
+          <section className="card">
+
+            <h4 className="card-title">
+              📋 TÌNH TRẠNG KHẨN CẤP
+            </h4>
 
             <p className="quote">
-              "Nước đang dâng cao khoảng 1m, tràn vào tầng trệt.
-              Trong nhà có 2 người già (80 tuổi), một người hạn chế vận động.
-              Cần hỗ trợ trước khi trời tối."
+              {mission.detailDescription}
             </p>
+
           </section>
-  <section className="card rc-md__section rc-md__section-resources">
+
+          <section className="card">
+
             <h4 className="card-title">
-              🧰 NGUỒN LỰC & MÔ TẢ CHI TIẾT
+              🧰 NGUỒN LỰC & MÔ TẢ
             </h4>
 
             <div className="resource-grid">
+
               <div className="resource-item">
                 <label>SỐ NGƯỜI GẶP NẠN</label>
-                <p>3</p>
+                <p>{mission.victimCount}</p>
               </div>
 
               <div className="resource-item">
-                <label>DỤNG CỤ CỨU HỘ HIỆN CÓ</label>
-                <p>Gậy, dây thừng, phao</p>
+                <label>DỤNG CỤ CỨU HỘ</label>
+                <p>{mission.availableRescueTools}</p>
               </div>
+
             </div>
 
             <label>NHU CẦU ĐẶC BIỆT</label>
-            <p className="resource-text">
-              Thuốc điều trị tim mạch cho người già
-            </p>
+            <p>{mission.specialNeeds}</p>
 
-            <label>MÔ TẢ CHI TIẾT</label>
-            <p className="resource-text">
-              Mực nước tiếp tục dâng, không còn điện,
-              cần hỗ trợ di chuyển khẩn cấp.
-            </p>
           </section>
-          {/* --- SECTION: MAP --- */}
-          <section className="map-card rc-md__section rc-md__section-map">
+
+          <section className="map-card">
+
             <iframe
               title="map"
-              src="https://www.google.com/maps?q=10.7758,106.7024&z=13&output=embed"
+              src={`https://www.google.com/maps?q=${mission.lat},${mission.lng}&z=13&output=embed`}
             />
-            <button className="map-link rc-md__action-map">
-              ↗ Xem bản đồ lớn
-            </button>
+
           </section>
-          
+
         </div>
 
-        {/* ========== RIGHT COLUMN ========== */}
-        <div className="right-col rc-md__column rc-md__column-right">
+        {/* RIGHT */}
+        <div className="right-col">
 
-          {/* --- SECTION: RESOURCES --- */}
-        
+          {/* IMAGE */}
+          <section className="card">
 
-          {/* --- SECTION: IMAGES --- */}
-          <section className="card rc-md__section rc-md__section-images">
             <h4 className="card-title">
               📷 HÌNH ẢNH HIỆN TRƯỜNG
             </h4>
 
             <Image.PreviewGroup>
+
               <div className="image-grid">
-                <Image src="https://picsum.photos/300/200?1" />
-                <Image src="https://picsum.photos/300/200?2" />
-                <Image src="https://picsum.photos/300/200?3" />
+
+                {images.length > 0 ? (
+
+                  images.map((img, i) => (
+
+                    <Image
+                      key={i}
+                      width={140}
+                      src={`${IMAGE_BASE}${img}`}
+                      alt={`rescue-${i}`}
+                    />
+
+                  ))
+
+                ) : (
+
+                  <p style={{ color: "#888" }}>
+                    Không có hình ảnh
+                  </p>
+
+                )}
+
               </div>
+
             </Image.PreviewGroup>
+
           </section>
 
-          {/* --- SECTION: PRIORITY --- */}
+          {/* PRIORITY */}
           <section className="card rc-priority-card">
-  <h4 className="card-title">⚠️ PHÂN LOẠI ƯU TIÊN</h4>
 
-  {/* P1 */}
-  <div
-    className={`rc-priority-item rc-p1 ${priority === "P1" ? "is-active" : ""}`}
-    onClick={() => setPriority("P1")}
-  >
-    <span className="rc-radio" />
-    <div className="rc-priority-content">
-      <strong>KHẨN CẤP</strong>
-      <p>Đe dọa tính mạng ngay lập tức</p>
-    </div>
-  </div>
+            <h4 className="card-title">
+              ⚠️ PHÂN LOẠI ƯU TIÊN
+            </h4>
 
-  {/* P2 */}
-  <div
-    className={`rc-priority-item rc-p2 ${priority === "P2" ? "is-active" : ""}`}
-    onClick={() => setPriority("P2")}
-  >
-    <span className="rc-radio" />
-    <div className="rc-priority-content">
-      <strong>CAO</strong>
-      <p>Tình trạng nghiêm trọng, cần xử lý sớm</p>
-    </div>
-  </div>
+            {/* P1 */}
+            <div
+              className={`rc-priority-item rc-p1 ${
+                priority === "P1" ? "is-active" : ""
+              }`}
+              onClick={() => setPriority("P1")}
+            >
+              <span className="rc-radio" />
 
-  {/* P3 */}
-  <div
-    className={`rc-priority-item rc-p3 ${priority === "P3" ? "is-active" : ""}`}
-    onClick={() => setPriority("P3")}
-  >
-    <span className="rc-radio" />
-    <div className="rc-priority-content">
-      <strong>THƯỜNG</strong>
-      <p>Hỗ trợ tiếp tế hoặc cứu hộ không gấp</p>
-    </div>
-  </div>
-</section>
+              <div className="rc-priority-content">
+                <strong>KHẨN CẤP</strong>
+                <p>Đe dọa tính mạng ngay lập tức</p>
+              </div>
+            </div>
 
+            {/* P2 */}
+            <div
+              className={`rc-priority-item rc-p2 ${
+                priority === "P2" ? "is-active" : ""
+              }`}
+              onClick={() => setPriority("P2")}
+            >
+              <span className="rc-radio" />
 
-          {/* --- SECTION: NOTE --- */}
-          <section className="card rc-md__section rc-md__section-note">
-            <h4 className="card-title">📝 GHI CHÚ XÁC MINH</h4>
-            <Input.TextArea rows={4} placeholder="Ghi chú sau khi gọi..." />
+              <div className="rc-priority-content">
+                <strong>CAO</strong>
+                <p>Tình trạng nghiêm trọng, cần xử lý sớm</p>
+              </div>
+            </div>
+
+            {/* P3 */}
+            <div
+              className={`rc-priority-item rc-p3 ${
+                priority === "P3" ? "is-active" : ""
+              }`}
+              onClick={() => setPriority("P3")}
+            >
+              <span className="rc-radio" />
+
+              <div className="rc-priority-content">
+                <strong>THƯỜNG</strong>
+                <p>Hỗ trợ tiếp tế hoặc cứu hộ không gấp</p>
+              </div>
+            </div>
+
           </section>
 
-          {/* --- ACTIONS --- */}
+          {/* NOTE */}
+          <section className="card">
+
+            <h4 className="card-title">
+              📝 GHI CHÚ XÁC MINH
+            </h4>
+
+            <Input.TextArea rows={4} />
+
+          </section>
+
+          {/* ACTION */}
           <Button
-  className="confirm-btn"
-  disabled={!priority}
-  onClick={() => {
-    if (!priority) return;
-
-    navigate("/coordinator/dang", {
-      state: {
-        priority,
-      },
-    });
-  }}
->
-  ▶ XÁC NHẬN & CHUYỂN ĐIỀU PHỐI
-</Button>
-
-
+            className="confirm-btn"
+            disabled={!priority}
+            onClick={() =>
+              navigate("/coordinator/dang", {
+                state: { mission, priority }
+              })
+            }
+          >
+            ▶ XÁC NHẬN & CHUYỂN ĐIỀU PHỐI
+          </Button>
 
           <p className="danger-text rc-md__action-flag">
             Đánh dấu yêu cầu giả mạo / Trùng lặp
           </p>
+
         </div>
+
       </div>
+
     </section>
   );
 }

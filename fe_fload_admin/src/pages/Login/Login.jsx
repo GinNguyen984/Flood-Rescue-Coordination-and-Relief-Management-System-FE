@@ -130,10 +130,10 @@ export default function Login() {
             QUẢN LÝ & <span>BẢO MẬT</span>
           </h1>
 
-          <p>
+          {/* <p>
             Giao diện điều hành thế hệ mới dành cho cán bộ
             vận hành cứu hộ quốc gia.
-          </p>
+          </p> */}
 
           <div className="hero-metrics">
             <span>24/7 VẬN HÀNH</span>

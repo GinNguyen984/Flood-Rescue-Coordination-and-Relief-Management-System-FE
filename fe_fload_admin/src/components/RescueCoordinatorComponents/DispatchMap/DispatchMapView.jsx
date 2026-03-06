@@ -1,29 +1,143 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { UpOutlined, DownOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 import {
-  rescueTeams,
-  vehicles,
-  INCIDENT_LOCATION,
-} from "./rc-dispatch.data";
+  getAllRescueTeams,
+  getRescueTeamLocation
+} from "../../../../api/axios/ManagerApi/rescueTeamApi";
+
+import {
+  getAllVehicles
+} from "../../../../api/axios/ManagerApi/vehicleApi";
+
+import { INCIDENT_LOCATION } from "./rc-dispatch.data";
 
 import "./rc-dispatch-map.css";
 
 export default function DispatchMapView() {
-  /* ================= NAVIGATE ================= */
-  const navigate = useNavigate(); // ✅ FIX QUAN TRỌNG
 
-  /* ================= STATE ================= */
+  const navigate = useNavigate();
+
   const [collapsed, setCollapsed] = useState(false);
   const [tab, setTab] = useState("team");
 
-  const [selectedTeam, setSelectedTeam] = useState(null); // ✅ CHỈ 1 ĐỘI
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedVehicles, setSelectedVehicles] = useState([]);
 
+  const [rescueTeams, setRescueTeams] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+
+  /* ================= LOAD TEAMS ================= */
+
+  useEffect(() => {
+
+    const fetchTeams = async () => {
+
+      try {
+
+        const res = await getAllRescueTeams();
+
+        const teams = res?.data?.items || [];
+
+        const mappedTeams = await Promise.all(
+
+          teams.map(async (team) => {
+
+            let lat = INCIDENT_LOCATION.lat;
+            let lng = INCIDENT_LOCATION.lng;
+            let address = "Không xác định";
+
+            try {
+
+              const locRes = await getRescueTeamLocation(team.rcid);
+
+              const location = locRes?.data?.location;
+
+              if (location) {
+
+                const [lngStr, latStr] = location.split(",");
+
+                lat = parseFloat(latStr);
+                lng = parseFloat(lngStr);
+
+                address = `${lat}, ${lng}`;
+
+              }
+
+            } catch {}
+
+            return {
+              id: team.rcid,
+              name: team.rcName,
+              specialty: "Cứu hộ tổng hợp",
+              members: 6,
+              address,
+              lat,
+              lng,
+              eta: "10 phút",
+              distance: "3 km"
+            };
+
+          })
+
+        );
+
+        setRescueTeams(mappedTeams);
+
+      }
+      catch (err) {
+
+        console.error("Load teams error:", err);
+
+      }
+
+    };
+
+    fetchTeams();
+
+  }, []);
+
+  /* ================= LOAD VEHICLES ================= */
+
+  useEffect(() => {
+
+    const fetchVehicles = async () => {
+
+      try {
+
+        const res = await getAllVehicles();
+
+        const list = res?.data || [];
+
+        const mappedVehicles = list.map((v) => ({
+
+          id: v.vehicleId,
+          name: v.vehicleName,
+          type: v.vehicleType,
+          capacity: v.vehicleLocation || "Không rõ"
+
+        }));
+
+        setVehicles(mappedVehicles);
+
+      }
+      catch (err) {
+
+        console.error("Load vehicles error:", err);
+
+      }
+
+    };
+
+    fetchVehicles();
+
+  }, []);
+
   /* ================= SELECT ================= */
+
   const toggleTeam = (id) => {
-    setSelectedTeam(id); // luôn chỉ 1 đội
+    setSelectedTeam(id);
   };
 
   const toggleVehicle = (id) => {
@@ -34,11 +148,14 @@ export default function DispatchMapView() {
     );
   };
 
-  /* ================= MAP URL ================= */
+  /* ================= MAP ================= */
+
   const mapUrl = useMemo(() => {
-    // Chưa chọn đội → map hiện trường
+
     if (!selectedTeam) {
+
       return `https://www.google.com/maps?q=${INCIDENT_LOCATION.lat},${INCIDENT_LOCATION.lng}&z=15&output=embed`;
+
     }
 
     const team = rescueTeams.find(
@@ -46,14 +163,15 @@ export default function DispatchMapView() {
     );
 
     if (!team) {
+
       return `https://www.google.com/maps?q=${INCIDENT_LOCATION.lat},${INCIDENT_LOCATION.lng}&z=15&output=embed`;
+
     }
 
-    // ✅ Vẽ đường đội → hiện trường (iframe-safe)
     return `https://www.google.com/maps?saddr=${team.lat},${team.lng}&daddr=${INCIDENT_LOCATION.lat},${INCIDENT_LOCATION.lng}&z=15&output=embed`;
-  }, [selectedTeam]);
 
-  /* ================= COUNTS ================= */
+  }, [selectedTeam, rescueTeams]);
+
   const availableCount =
     tab === "team"
       ? rescueTeams.length
@@ -63,8 +181,8 @@ export default function DispatchMapView() {
     Boolean(selectedTeam) &&
     selectedVehicles.length > 0;
 
-  /* ================= CONFIRM ================= */
   const handleConfirmDispatch = () => {
+
     if (!canConfirm) return;
 
     navigate("/coordinator/mina", {
@@ -73,16 +191,12 @@ export default function DispatchMapView() {
         vehicleIds: selectedVehicles,
       },
     });
+
   };
 
-  /* ================= RENDER ================= */
   return (
-    <section
-      className={`rc-map ${
-        collapsed ? "rc-map--expanded" : ""
-      }`}
-    >
-      {/* ================= MAP ================= */}
+    <section className={`rc-map ${collapsed ? "rc-map--expanded" : ""}`}>
+
       <div className="rc-map__canvas">
         <iframe
           title="rescue-map"
@@ -92,15 +206,12 @@ export default function DispatchMapView() {
         />
       </div>
 
-      {/* ================= PANEL ================= */}
-      <div
-        className={`rc-map__panel ${
-          collapsed ? "is-collapsed" : ""
-        }`}
-      >
-        {/* ===== HEADER ===== */}
+      <div className={`rc-map__panel ${collapsed ? "is-collapsed" : ""}`}>
+
         <div className="rc-map__panel-header">
+
           <div className="rc-map__panel-title">
+
             <h4>LỰA CHỌN NGUỒN LỰC</h4>
 
             <span className="rc-map__badge">
@@ -108,125 +219,92 @@ export default function DispatchMapView() {
             </span>
 
             <span
-              className={`rc-map__tab ${
-                tab === "team" ? "active" : ""
-              }`}
+              className={`rc-map__tab ${tab === "team" ? "active" : ""}`}
               onClick={() => setTab("team")}
             >
               Đội Cứu Hộ
             </span>
 
             <span
-              className={`rc-map__tab ${
-                tab === "vehicle" ? "active" : ""
-              }`}
+              className={`rc-map__tab ${tab === "vehicle" ? "active" : ""}`}
               onClick={() => setTab("vehicle")}
             >
               Phương Tiện
             </span>
+
           </div>
 
           <button
             className="rc-map__collapse-btn"
-            onClick={() =>
-              setCollapsed(!collapsed)
-            }
+            onClick={() => setCollapsed(!collapsed)}
           >
-            {collapsed ? (
-              <>
-                MỞ RỘNG <DownOutlined />
-              </>
-            ) : (
-              <>
-                THU GỌN <UpOutlined />
-              </>
-            )}
+            {collapsed ? <>MỞ RỘNG <DownOutlined /></> : <>THU GỌN <UpOutlined /></>}
           </button>
+
         </div>
 
-        {/* ================= LIST ================= */}
         <div className="rc-map__teams">
-          {/* ===== TEAMS ===== */}
+
           {tab === "team" &&
             rescueTeams.map((team) => (
+
               <div
                 key={team.id}
-                className={`rc-team ${
-                  selectedTeam === team.id
-                    ? "active"
-                    : ""
-                }`}
-                onClick={() =>
-                  toggleTeam(team.id)
-                }
+                className={`rc-team ${selectedTeam === team.id ? "active" : ""}`}
+                onClick={() => toggleTeam(team.id)}
               >
+
                 <h5>{team.name}</h5>
+
                 <span className="rc-team__status">
                   ● SẴN SÀNG
                 </span>
 
-                <p>
-                  <b>Chuyên môn:</b>{" "}
-                  {team.specialty}
-                </p>
-                <p>
-                  <b>Quân số:</b>{" "}
-                  {team.members}
-                </p>
-
-                {/* ✅ ĐỊA CHỈ THẬT */}
-                <p>
-                  <b>Vị trí:</b>{" "}
-                  {team.address}
-                </p>
+                <p><b>Chuyên môn:</b> {team.specialty}</p>
+                <p><b>Quân số:</b> {team.members}</p>
+                <p><b>Vị trí:</b> {team.address}</p>
 
                 <div className="rc-team__meta">
                   <span>ETA: {team.eta}</span>
                   <span>{team.distance}</span>
                 </div>
+
               </div>
+
             ))}
 
-          {/* ===== VEHICLES ===== */}
           {tab === "vehicle" &&
             vehicles.map((v) => (
+
               <div
                 key={v.id}
-                className={`rc-team ${
-                  selectedVehicles.includes(v.id)
-                    ? "active"
-                    : ""
-                }`}
-                onClick={() =>
-                  toggleVehicle(v.id)
-                }
+                className={`rc-team ${selectedVehicles.includes(v.id) ? "active" : ""}`}
+                onClick={() => toggleVehicle(v.id)}
               >
+
                 <h5>{v.name}</h5>
+
                 <span className="rc-team__status">
                   ● SẴN SÀNG
                 </span>
-                <p>
-                  <b>Loại:</b> {v.type}
-                </p>
-                <p>
-                  <b>Sức chứa:</b>{" "}
-                  {v.capacity}
-                </p>
+
+                <p><b>Loại:</b> {v.type}</p>
+                <p><b>Sức chứa:</b> {v.capacity}</p>
+
               </div>
+
             ))}
+
         </div>
 
-        {/* ================= FOOTER ================= */}
         <div className="rc-map__footer">
+
           <span className="rc-map__selected">
-            Đã chọn{" "}
-            <b>{selectedTeam ? 1 : 0}</b>{" "}
-            Đội và{" "}
-            <b>{selectedVehicles.length}</b>{" "}
-            Phương tiện
+            Đã chọn <b>{selectedTeam ? 1 : 0}</b> Đội và <b>{selectedVehicles.length}</b> Phương tiện
           </span>
 
           <div className="rc-map__actions">
+
             <button className="btn-cancel">
               Hủy bỏ
             </button>
@@ -238,9 +316,13 @@ export default function DispatchMapView() {
             >
               ▶ Xác nhận điều động
             </button>
+
           </div>
+
         </div>
+
       </div>
+
     </section>
   );
 }

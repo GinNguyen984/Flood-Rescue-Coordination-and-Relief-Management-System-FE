@@ -1,25 +1,52 @@
 import { Button, Input, Image } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PhoneOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-
+import { getUrgencyLevels } from "../../../../api/axios/CoordinatorApi/RescueRequestApi";
 import "./MissionDetail.css";
 
 const IMAGE_BASE = "https://api-rescue.purintech.id.vn";
-
+const priorityTranslate = {
+  High: "Mức Độ Cao",
+  Medium: "Mức Độ Trung Bình",
+  Low: "Mức Độ Thấp"
+};
 export default function MissionDetail({ mission }) {
-
+  const [urgencyLevels, setUrgencyLevels] = useState([]);
   const [priority, setPriority] = useState(null);
   const navigate = useNavigate();
 
   if (!mission) {
     return (
-      <div style={{ padding: 40 }}>
-        Chọn yêu cầu bên trái
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 22,
+          fontWeight: 600,
+          color: "#555"
+        }}
+      >
+        Chọn yêu cầu chọn bên trái dể hiện đầy đủ thông tin
       </div>
     );
   }
+  useEffect(() => {
 
+    const fetchUrgencyLevels = async () => {
+      try {
+        const data = await getUrgencyLevels();
+        setUrgencyLevels(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    fetchUrgencyLevels();
+  
+  }, []);
   /* FIX IMAGE FIELD (KHÔNG ĐỔI LOGIC) */
   const images = mission.imageUrls || mission.images || [];
 
@@ -181,56 +208,43 @@ export default function MissionDetail({ mission }) {
           {/* PRIORITY */}
           <section className="card rc-priority-card">
 
-            <h4 className="card-title">
-              ⚠️ PHÂN LOẠI ƯU TIÊN
-            </h4>
+<h4 className="card-title">
+  ⚠️ PHÂN LOẠI ƯU TIÊN
+</h4>
 
-            {/* P1 */}
-            <div
-              className={`rc-priority-item rc-p1 ${
-                priority === "P1" ? "is-active" : ""
-              }`}
-              onClick={() => setPriority("P1")}
-            >
-              <span className="rc-radio" />
+{urgencyLevels.map((level, index) => {
 
-              <div className="rc-priority-content">
-                <strong>KHẨN CẤP</strong>
-                <p>Đe dọa tính mạng ngay lập tức</p>
-              </div>
-            </div>
+  const priorityCode = `P${index + 1}`;
 
-            {/* P2 */}
-            <div
-              className={`rc-priority-item rc-p2 ${
-                priority === "P2" ? "is-active" : ""
-              }`}
-              onClick={() => setPriority("P2")}
-            >
-              <span className="rc-radio" />
+  return (
 
-              <div className="rc-priority-content">
-                <strong>CAO</strong>
-                <p>Tình trạng nghiêm trọng, cần xử lý sớm</p>
-              </div>
-            </div>
+    <div
+      key={level.urgencyLevelId}
+      className={`rc-priority-item rc-p${index + 1} ${
+        priority === priorityCode ? "is-active" : ""
+      }`}
+      onClick={() => setPriority(priorityCode)}
+    >
 
-            {/* P3 */}
-            <div
-              className={`rc-priority-item rc-p3 ${
-                priority === "P3" ? "is-active" : ""
-              }`}
-              onClick={() => setPriority("P3")}
-            >
-              <span className="rc-radio" />
+      <span className="rc-radio" />
 
-              <div className="rc-priority-content">
-                <strong>THƯỜNG</strong>
-                <p>Hỗ trợ tiếp tế hoặc cứu hộ không gấp</p>
-              </div>
-            </div>
+      <div className="rc-priority-content">
 
-          </section>
+      <strong>{priorityTranslate[level.levelName] || level.levelName}</strong>
+
+        <p>{level.description}</p>
+        <small className="sla-text">
+    Thời gian xử lý: {Math.floor(level.slaMinutes / 60)} giờ
+  </small>
+      </div>
+
+    </div>
+
+  );
+
+})}
+
+</section>
 
           {/* NOTE */}
           <section className="card">

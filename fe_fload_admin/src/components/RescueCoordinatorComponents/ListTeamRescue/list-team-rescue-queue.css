@@ -1,17 +1,28 @@
+/* ===== CONTAINER ===== */
+
 .ltr-queue {
   height: 100%;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
+
   display: flex;
   flex-direction: column;
+
+  overflow: hidden;
 }
+
+/* ===== HEADER ===== */
 
 .ltr-queue__header {
   padding: 16px;
+
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+
   border-bottom: 1px solid #eef2f7;
+
+  flex-shrink: 0;
 }
 
 .ltr-queue__header h3 {
@@ -28,50 +39,152 @@
 .ltr-queue__live {
   background: #fee2e2;
   color: #dc2626;
+
   padding: 4px 10px;
   font-size: 11px;
   font-weight: 700;
+
   border-radius: 999px;
 }
 
+/* ===== LIST ===== */
+
 .ltr-queue__list {
+  flex: 1;
+
   padding: 14px;
+
   overflow-y: auto;
+
   display: flex;
   flex-direction: column;
   gap: 14px;
+
+  scroll-behavior: smooth;
+
+  /* smooth scroll */
+
+  -webkit-overflow-scrolling: touch;
 }
+
+/* ===== CUSTOM SCROLLBAR ===== */
+
+.ltr-queue__list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ltr-queue__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ltr-queue__list::-webkit-scrollbar-thumb {
+  background: #cbd5f5;
+  border-radius: 6px;
+}
+
+.ltr-queue__list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ===== CARD ===== */
 
 .ltr-queue__card {
   background: #ffffff;
+
   border-radius: 16px;
+
   padding: 14px;
+
   border: 2px solid #eef2f7;
+
   cursor: pointer;
+
+  transition: all 0.25s ease;
 }
+
+/* hover animation */
+
+.ltr-queue__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== PRIORITY ===== */
 
 .ltr-queue__card--urgent {
   border-color: #38bdf8;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
 }
+
+.ltr-queue__card--medium {
+  border-color: #facc15;
+}
+
+.ltr-queue__card--low {
+  border-color: #94a3b8;
+}
+
+/* ===== TOP ===== */
 
 .ltr-queue__top {
   display: flex;
   justify-content: space-between;
+
   font-size: 12px;
   color: #64748b;
 }
 
+/* ===== REQUEST ID ===== */
+
+.ltr-queue__request-id {
+  font-weight: 600;
+  color: #334155;
+}
+
+/* ===== LOCATION ===== */
+
 .ltr-queue__location {
   margin-top: 6px;
+
   display: flex;
   gap: 6px;
+
   font-size: 13px;
   color: #475569;
 }
 
-.ltr-queue__tags {
-  margin-top: 8px;
+/* ===== PHONE ===== */
+
+.ltr-queue__phone {
+  margin-top: 4px;
+
   display: flex;
   gap: 6px;
+
+  font-size: 13px;
+  color: #334155;
+}
+
+/* ===== TAGS ===== */
+
+.ltr-queue__tags {
+  margin-top: 8px;
+
+  display: flex;
+  gap: 6px;
+
+  flex-wrap: wrap;
+}
+
+/* ===== SLA ===== */
+
+.ltr-queue__sla {
+  margin-top: 8px;
+
+  font-size: 12px;
+
+  display: flex;
+  gap: 6px;
+
+  color: #475569;
 }

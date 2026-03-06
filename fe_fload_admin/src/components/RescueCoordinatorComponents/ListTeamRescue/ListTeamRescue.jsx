@@ -1,89 +1,242 @@
 import { useEffect, useState } from "react";
 import { Tag } from "antd";
-import { EnvironmentOutlined } from "@ant-design/icons";
+import {
+  EnvironmentOutlined,
+  PhoneOutlined,
+  ClockCircleOutlined
+} from "@ant-design/icons";
+
+import { getDispatchingRescueRequests } from "../../../../api/axios/CoordinatorApi/RescueRequestApi";
+
 import "./list-team-rescue-queue.css";
 
-/* ===== MOCK DATA ===== */
-const initialRequests = [
-  {
-    id: "#1234",
-    title: "Ngập lụt Huỳnh Tấn Phát",
-    location: "Quận 7, TP.HCM",
-    tags: ["KHẨN CẤP", "Y TẾ"],
-    createdAt: Date.now() - 2 * 60 * 1000,
-    level: "urgent",
-  },
-  {
-    id: "#1235",
-    title: "Cây đổ chắn đường",
-    location: "Nguyễn Văn Linh, Q7",
-    tags: ["TRUNG BÌNH"],
-    createdAt: Date.now() - 15 * 60 * 1000,
-    level: "medium",
-  },
-  {
-    id: "#1236",
-    title: "Hỗ trợ di dời dân",
-    location: "Tân Thuận, Q7",
-    tags: ["THEO DÕI"],
-    createdAt: Date.now() - 24 * 60 * 1000,
-    level: "low",
-  },
+const MAIN_INCIDENT_OPTIONS = [
+  { value: "MedicalEmergency", label: "Y tế khẩn cấp" },
+  { value: "TrafficAccident", label: "Tai nạn giao thông" },
+  { value: "FireExplosion", label: "Cháy nổ" },
+  { value: "DisasterFlood", label: "Ngập lụt" },
 ];
 
 const timeAgo = (time) => {
+
   const diff = Math.floor((Date.now() - time) / 60000);
+
+  if (diff <= 0) return "Vừa xong";
+
   return `${diff} phút trước`;
+
 };
 
-export default function ListTeamRescue() {
-  const [data] = useState(initialRequests);
-  const [, force] = useState(0);
+const formatSla = (minutes) => {
 
+  if (!minutes) return "Không xác định";
+
+  if (minutes < 60) return `${minutes} phút`;
+
+  if (minutes < 1440) return `${Math.floor(minutes / 60)} giờ`;
+
+  return `${Math.floor(minutes / 1440)} ngày`;
+
+};
+
+const convertApi = (data = []) => {
+
+  if (!Array.isArray(data)) return [];
+
+  const levelMap = {
+    High: "urgent",
+    Medium: "medium",
+    Low: "low"
+  };
+
+  return data.map((item) => ({
+
+    id: item.rescueRequestId,
+    fullname: item.fullname,
+    phone: item.contactPhone,
+
+    location:
+      item.locationText ||
+      `${item.locationLat}, ${item.locationLng}`,
+
+    lat: item.locationLat,
+    lng: item.locationLng,
+
+    createdAt: new Date(item.createdAt).getTime(),
+
+    level: levelMap[item.urgencyLevelName] || "medium",
+
+    urgency: item.urgencyLevelName,
+
+    incident:
+      MAIN_INCIDENT_OPTIONS.find(
+        (o) => o.value === item.requestType
+      )?.label || item.requestType,
+
+    sla: item.slaMinutes
+
+  }));
+
+};
+
+export default function ListTeamRescue({ onSelectRequest }) {
+
+  const [data, setData] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [, force] = useState(0);
+  const [currentTime, setCurrentTime] = useState("");
   useEffect(() => {
-    const timer = setInterval(() => force((v) => v + 1), 60000);
-    return () => clearInterval(timer);
+
+    const fetchData = async () => {
+
+      try {
+
+        const res = await getDispatchingRescueRequests();
+
+        const list = Array.isArray(res)
+          ? res
+          : res?.data || [];
+
+        setData(convertApi(list));
+
+      }
+      catch (error) {
+
+        console.error(error);
+
+      }
+
+    };
+
+    fetchData();
+
   }, []);
 
+  useEffect(() => {
+
+    const timer = setInterval(() => {
+      force((v) => v + 1);
+    }, 60000);
+
+    return () => clearInterval(timer);
+
+  }, []);
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+
+      setCurrentTime(
+        now.toLocaleTimeString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+      );
+    };
+
+    updateTime();
+
+    const timer = setInterval(updateTime, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
   return (
+
     <aside className="ltr-queue">
+
       <div className="ltr-queue__header">
+
         <div>
           <h3>CHỜ ĐIỀU PHỐI ({data.length})</h3>
+
           <span className="ltr-queue__sub">
-            Yêu cầu khẩn cấp cần xử lý ngay
+            Yêu cầu cần điều phối đội cứu hộ
           </span>
         </div>
 
-        <span className="ltr-queue__live">REAL-TIME</span>
+        <span className="ltr-queue__live">
+          {currentTime}
+        </span>
+
       </div>
 
       <div className="ltr-queue__list">
+
         {data.map((item) => (
+
           <div
             key={item.id}
-            className={`ltr-queue__card ltr-queue__card--${item.level}`}
+            className={`ltr-queue__card ltr-queue__card--${item.level}
+              ${selectedId === item.id ? "ltr-active" : ""}`}
+            onClick={() => {
+
+              setSelectedId(item.id);
+
+              onSelectRequest?.(item);
+
+            }}
           >
+
             <div className="ltr-queue__top">
-              <Tag color="red">{item.tags[0]}</Tag>
-              <span>{timeAgo(item.createdAt)}</span>
+
+              <div className="ltr-queue__request-id">
+                Mã yêu cầu: #{item.id}
+              </div>
+
+              <Tag color="red">
+                {item.urgency?.toUpperCase()}
+              </Tag>
+
+              <span>
+                {timeAgo(item.createdAt)}
+              </span>
+
             </div>
 
-            <h4>{item.title}</h4>
+            <h4>
+              {item.fullname}
+            </h4>
+
+            <div className="ltr-queue__phone">
+
+              <PhoneOutlined />
+
+              {item.phone}
+
+            </div>
 
             <div className="ltr-queue__location">
+
               <EnvironmentOutlined />
+
               {item.location}
+
             </div>
 
             <div className="ltr-queue__tags">
-              {item.tags.slice(1).map((t) => (
-                <Tag key={t}>{t}</Tag>
-              ))}
+
+              <Tag color="blue">
+                {item.incident}
+              </Tag>
+
             </div>
+
+            <div className="ltr-queue__sla">
+
+              <ClockCircleOutlined />
+
+              Thời gian xử lý: {formatSla(item.sla)}
+
+            </div>
+
           </div>
+
         ))}
+
       </div>
+
     </aside>
+
   );
+
 }

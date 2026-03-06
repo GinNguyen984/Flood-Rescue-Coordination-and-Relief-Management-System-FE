@@ -68,6 +68,7 @@ export default function DispatchMapView() {
             } catch {}
 
             return {
+
               id: team.rcid,
               name: team.rcName,
               specialty: "Cứu hộ tổng hợp",
@@ -77,6 +78,7 @@ export default function DispatchMapView() {
               lng,
               eta: "10 phút",
               distance: "3 km"
+
             };
 
           })
@@ -115,7 +117,8 @@ export default function DispatchMapView() {
           id: v.vehicleId,
           name: v.vehicleName,
           type: v.vehicleType,
-          capacity: v.vehicleLocation || "Không rõ"
+          capacity: v.vehicleLocation || "Không rõ",
+          status: v.vehicleStatus?.toLowerCase() || ""
 
         }));
 
@@ -141,11 +144,13 @@ export default function DispatchMapView() {
   };
 
   const toggleVehicle = (id) => {
+
     setSelectedVehicles((prev) =>
       prev.includes(id)
         ? prev.filter((v) => v !== id)
         : [...prev, id]
     );
+
   };
 
   /* ================= MAP ================= */
@@ -172,6 +177,8 @@ export default function DispatchMapView() {
 
   }, [selectedTeam, rescueTeams]);
 
+  /* ================= COUNTS ================= */
+
   const availableCount =
     tab === "team"
       ? rescueTeams.length
@@ -180,6 +187,8 @@ export default function DispatchMapView() {
   const canConfirm =
     Boolean(selectedTeam) &&
     selectedVehicles.length > 0;
+
+  /* ================= CONFIRM ================= */
 
   const handleConfirmDispatch = () => {
 
@@ -194,17 +203,46 @@ export default function DispatchMapView() {
 
   };
 
+  /* ================= VEHICLE STATUS ================= */
+
+  const getVehicleStatus = (status) => {
+
+    if (status === "ready")
+      return "● SẴN SÀNG";
+
+    if (status === "maintenance")
+      return "● BẢO TRÌ";
+
+    if (status === "in use")
+      return "● ĐANG SỬ DỤNG";
+
+    if (status === "broken")
+      return "● HỎNG";
+
+    return "● KHÔNG XÁC ĐỊNH";
+
+  };
+
+  /* ================= UI ================= */
+
   return (
+
     <section className={`rc-map ${collapsed ? "rc-map--expanded" : ""}`}>
 
+      {/* MAP */}
+
       <div className="rc-map__canvas">
+
         <iframe
           title="rescue-map"
           className="rc-map__iframe"
           src={mapUrl}
           loading="lazy"
         />
+
       </div>
+
+      {/* PANEL */}
 
       <div className={`rc-map__panel ${collapsed ? "is-collapsed" : ""}`}>
 
@@ -238,10 +276,14 @@ export default function DispatchMapView() {
             className="rc-map__collapse-btn"
             onClick={() => setCollapsed(!collapsed)}
           >
-            {collapsed ? <>MỞ RỘNG <DownOutlined /></> : <>THU GỌN <UpOutlined /></>}
+            {collapsed
+              ? <>MỞ RỘNG <DownOutlined /></>
+              : <>THU GỌN <UpOutlined /></>}
           </button>
 
         </div>
+
+        {/* LIST */}
 
         <div className="rc-map__teams">
 
@@ -256,14 +298,14 @@ export default function DispatchMapView() {
 
                 <h5>{team.name}</h5>
 
-                <span className="rc-team__status">
-                  ● SẴN SÀNG
-                </span>
+              
 
                 <p><b>Chuyên môn:</b> {team.specialty}</p>
                 <p><b>Quân số:</b> {team.members}</p>
                 <p><b>Vị trí:</b> {team.address}</p>
-
+                <span className="rc-team__status">
+                  ● SẴN SÀNG
+                </span>
                 <div className="rc-team__meta">
                   <span>ETA: {team.eta}</span>
                   <span>{team.distance}</span>
@@ -282,20 +324,22 @@ export default function DispatchMapView() {
                 onClick={() => toggleVehicle(v.id)}
               >
 
-                <h5>{v.name}</h5>
+                <h5>Phương tiện : {v.name}</h5>
 
-                <span className="rc-team__status">
-                  ● SẴN SÀNG
-                </span>
+              
 
                 <p><b>Loại:</b> {v.type}</p>
-                <p><b>Sức chứa:</b> {v.capacity}</p>
-
+                <p><b>Khu vực:</b> {v.capacity}</p>
+                <span className="rc-team__status">
+                  {getVehicleStatus(v.status)}
+                </span>
               </div>
 
             ))}
 
         </div>
+
+        {/* FOOTER */}
 
         <div className="rc-map__footer">
 
@@ -324,5 +368,7 @@ export default function DispatchMapView() {
       </div>
 
     </section>
+
   );
+
 }

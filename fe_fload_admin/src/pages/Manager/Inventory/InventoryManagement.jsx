@@ -10,6 +10,9 @@ import {
   Space,
   Tabs,
   message,
+  Card,
+  Row,
+  Col
 } from "antd";
 
 import {
@@ -27,13 +30,17 @@ import {
   getWarehouseInventory,
 } from "../../../../api/axios/ManagerApi/inventoryApi";
 
+import "./InventoryManagement.css";
+
 export default function InventoryManagement() {
+
   const [warehouses, setWarehouses] = useState([]);
   const [items, setItems] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [inventory, setInventory] = useState([]);
 
   const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
+  const [activeTab, setActiveTab] = useState("");
 
   const [warehouseDrawer, setWarehouseDrawer] = useState(false);
   const [itemDrawer, setItemDrawer] = useState(false);
@@ -50,22 +57,30 @@ export default function InventoryManagement() {
     loadAll();
   }, []);
 
-  /* ================= LOAD ================= */
+  /* ================= LOAD DATA ================= */
 
   const loadAll = async () => {
     try {
+
       const [w, i, t] = await Promise.all([
         getAllWarehouses(),
         getAllReliefItems(),
         getInventoryTransactions(),
       ]);
 
-      setWarehouses(
-        w.data.map((x) => ({
-          ...x,
-          id: x.id || x.warehouseId,
-        }))
-      );
+      const warehouseData = w.data.map((x) => ({
+        ...x,
+        id: x.id || x.warehouseId,
+      }));
+
+      setWarehouses(warehouseData);
+
+      if (warehouseData.length > 0) {
+        const firstId = warehouseData[0].id;
+        setSelectedWarehouseId(firstId);
+        setActiveTab(`warehouse-${firstId}`);
+        handleSelectWarehouseInventory(firstId);
+      }
 
       setItems(
         i.data.map((x) => ({
@@ -80,6 +95,7 @@ export default function InventoryManagement() {
           id: x.id || x.transactionId,
         }))
       );
+
     } catch {
       message.error("Load dữ liệu thất bại");
     }
@@ -88,11 +104,14 @@ export default function InventoryManagement() {
   /* ================= INVENTORY ================= */
 
   const handleSelectWarehouseInventory = async (warehouseId) => {
+
     setSelectedWarehouseId(warehouseId);
-    if (!warehouseId) return;
+    setActiveTab(`warehouse-${warehouseId}`);
 
     try {
+
       const res = await getWarehouseInventory(warehouseId);
+
       setInventory(
         res.data.map((x, index) => ({
           key: index,
@@ -100,39 +119,62 @@ export default function InventoryManagement() {
           quantity: x.quantity,
         }))
       );
+
     } catch {
       message.error("Load inventory thất bại");
     }
   };
 
+  /* ================= TRANSACTION FILTER ================= */
+
+  const inTransactions = transactions.filter(
+    (t) => t.transactionType === "IN"
+  );
+
+  const pendingTransactions = inTransactions.filter(
+    (t) => !t.confirmedAt && !t.confirmed_at
+  );
+
+  const confirmedTransactions = inTransactions.filter(
+    (t) => t.confirmedAt || t.confirmed_at
+  );
+
   /* ================= WAREHOUSE ================= */
 
   const handleSaveWarehouse = async (values) => {
+
     try {
+
       if (editingWarehouse) {
         await updateWarehouse(editingWarehouse.id, values);
       } else {
         await createWarehouse(values);
       }
+
+      message.success("Lưu warehouse thành công");
+
       setWarehouseDrawer(false);
       setEditingWarehouse(null);
       form.resetFields();
       loadAll();
+
     } catch {
       message.error("Lưu warehouse thất bại");
     }
   };
 
   const handleDeleteWarehouse = async (id) => {
-    if (!id) return;
 
     try {
+
       await deleteWarehouse(id);
       message.success("Xoá kho thành công");
       loadAll();
+
     } catch (err) {
+
       if (err.response?.status === 409) {
-        message.error("Kho đang còn vật phẩm, không được xoá");
+        message.error("Kho đang còn vật phẩm");
       } else {
         message.error("Xoá kho thất bại");
       }
@@ -142,58 +184,77 @@ export default function InventoryManagement() {
   /* ================= ITEM ================= */
 
   const handleSaveItem = async (values) => {
+
     try {
+
       if (editingItem) {
         await updateReliefItem(editingItem.id, values);
       } else {
         await createReliefItem(values);
       }
+
+      message.success("Lưu item thành công");
+
       setItemDrawer(false);
       setEditingItem(null);
       itemForm.resetFields();
       loadAll();
+
     } catch {
       message.error("Lưu item thất bại");
     }
   };
 
   const handleDeleteItem = async (id) => {
-    if (!id) return;
 
     try {
       await deleteReliefItem(id);
-      message.success("Xoá vật phẩm thành công");
+      message.success("Xoá item thành công");
       loadAll();
-    } catch (err) {
-      if (err.response?.status === 409) {
-        message.error("Vật phẩm đang được sử dụng, không được xoá");
-      } else {
-        message.error("Xoá vật phẩm thất bại");
-      }
+    } catch {
+      message.error("Xoá item thất bại");
     }
   };
 
   /* ================= TRANSACTION ================= */
 
   const handleCreateTransaction = async (values) => {
+
     try {
+
       await createInventoryTransaction(values);
+
       message.success("Tạo transaction thành công");
+
       setTransactionDrawer(false);
       transactionForm.resetFields();
       loadAll();
+
     } catch {
       message.error("Tạo transaction thất bại");
     }
   };
 
   const handleConfirmTransaction = async (id) => {
-    if (!id) return;
-    await confirmInventoryTransaction(id);
-    loadAll();
+
+    try {
+
+      await confirmInventoryTransaction(id);
+
+      message.success("Confirm thành công");
+
+      loadAll();
+
+      if (selectedWarehouseId) {
+        handleSelectWarehouseInventory(selectedWarehouseId);
+      }
+
+    } catch {
+      message.error("Confirm thất bại");
+    }
   };
 
-  /* ================= COLUMNS ================= */
+  /* ================= TABLE COLUMNS ================= */
 
   const warehouseColumns = [
     { title: "ID", dataIndex: "id" },
@@ -203,6 +264,7 @@ export default function InventoryManagement() {
       title: "Action",
       render: (_, record) => (
         <Space>
+
           <Button
             onClick={() => {
               setEditingWarehouse(record);
@@ -212,9 +274,14 @@ export default function InventoryManagement() {
           >
             Edit
           </Button>
-          <Button danger onClick={() => handleDeleteWarehouse(record.id)}>
+
+          <Button
+            danger
+            onClick={() => handleDeleteWarehouse(record.id)}
+          >
             Delete
           </Button>
+
         </Space>
       ),
     },
@@ -228,6 +295,7 @@ export default function InventoryManagement() {
       title: "Action",
       render: (_, record) => (
         <Space>
+
           <Button
             onClick={() => {
               setEditingItem(record);
@@ -237,9 +305,14 @@ export default function InventoryManagement() {
           >
             Edit
           </Button>
-          <Button danger onClick={() => handleDeleteItem(record.id)}>
+
+          <Button
+            danger
+            onClick={() => handleDeleteItem(record.id)}
+          >
             Delete
           </Button>
+
         </Space>
       ),
     },
@@ -251,269 +324,279 @@ export default function InventoryManagement() {
     { title: "Type", dataIndex: "transactionType" },
     {
       title: "Action",
-      render: (_, record) => (
-        <Button onClick={() => handleConfirmTransaction(record.id)}>
-          Confirm
-        </Button>
-      ),
+      render: (_, record) =>
+        record.confirmedAt || record.confirmed_at ? (
+          <span style={{ color: "green", fontWeight: "bold" }}>
+            Confirmed
+          </span>
+        ) : (
+          <Button
+            type="primary"
+            onClick={() => handleConfirmTransaction(record.id)}
+          >
+            Confirm
+          </Button>
+        ),
     },
   ];
 
-  /* ================= TABS ================= */
+  /* ================= WAREHOUSE INVENTORY TABS ================= */
 
-  const tabItems = [
-    {
-      key: "1",
-      label: "Kho",
-      children: (
-        <>
-          <Button type="primary" onClick={() => setWarehouseDrawer(true)}>
-            Add Warehouse
-          </Button>
-          <Table rowKey="id" columns={warehouseColumns} dataSource={warehouses} />
-        </>
-      ),
-    },
-    {
-      key: "2",
-      label: "Relief Items",
-      children: (
-        <>
-          <Button type="primary" onClick={() => setItemDrawer(true)}>
-            Add Item
-          </Button>
-          <Table rowKey="id" columns={itemColumns} dataSource={items} />
-        </>
-      ),
-    },
-    {
-      key: "3",
-      label: "Tồn kho",
-      children: (
-        <>
+  const warehouseTabs = warehouses.map((w) => ({
+    key: `warehouse-${w.id}`,
+    label: w.warehouseName,
+    children: (
+      <div className="inventory-card">
+
+        <Row gutter={[16, 16]}>
+  {inventory.map((item) => (
+    <Col xs={24} sm={12} md={8} lg={6} key={item.key}>
+      <Card className="inventory-item-card" hoverable>
+
+        <h3>{item.itemName}</h3>
+
+        <p className="inventory-quantity">
+          {item.quantity}
+        </p>
+
+        <span className="inventory-label">
+          Available
+        </span>
+
+      </Card>
+    </Col>
+  ))}
+</Row>
+
+      </div>
+    ),
+  }));
+
+  /* ================= UI ================= */
+
+  return (
+    <div className="inventory-page">
+
+      <div className="inventory-header">
+
+        <div className="inventory-title">
+          <h2>📦 Inventory Management</h2>
+          <p>Quản lý kho cứu trợ</p>
+        </div>
+
+        <Space>
+
           <Select
+            style={{ width: 220 }}
+            value={selectedWarehouseId}
             placeholder="Chọn kho"
-            style={{ width: 300, marginBottom: 16 }}
             options={warehouses.map((w) => ({
               value: w.id,
               label: w.warehouseName,
             }))}
             onChange={handleSelectWarehouseInventory}
           />
-          <Table
-            rowKey="key"
-            columns={[
-              { title: "Item", dataIndex: "itemName" },
-              { title: "Quantity", dataIndex: "quantity" },
-            ]}
-            dataSource={inventory}
-          />
-        </>
-      ),
-    },
-    {
-      key: "4",
-      label: "Giao dịch",
-      children: (
-        <>
-          <Button type="primary" onClick={() => setTransactionDrawer(true)}>
-            Create Transaction
+
+          <Button
+            type="primary"
+            onClick={() => {
+              setEditingWarehouse(null);
+              form.resetFields();
+              setWarehouseDrawer(true);
+            }}
+          >
+            Thêm kho
           </Button>
-          <Table
-            rowKey="id"
-            columns={transactionColumns}
-            dataSource={transactions}
-          />
-        </>
-      ),
-    },
-  ];
 
-  return (
-    <>
-      <h2>Inventory Management</h2>
-      <Tabs items={tabItems} />
-      {/* Giữ nguyên toàn bộ Drawer phía dưới như bạn gửi */}
-      {/* ================= WAREHOUSE DRAWER ================= */}
-<Drawer
-  title={editingWarehouse ? "Edit Warehouse" : "Add Warehouse"}
-  open={warehouseDrawer}
-  onClose={() => {
-    setWarehouseDrawer(false);
-    setEditingWarehouse(null);
-    form.resetFields();
+          <Button onClick={() => setActiveTab("warehouses")}>
+            Warehouses
+          </Button>
+
+          <Button onClick={() => setActiveTab("items")}>
+            Relief Items
+          </Button>
+
+          <Button
+            type="primary"
+            onClick={() => setActiveTab("transactions")}
+          >
+            Giao dịch
+          </Button>
+
+        </Space>
+      </div>
+
+      <Tabs
+  activeKey={activeTab}
+  renderTabBar={() => null}   // ẨN THANH TAB
+  onChange={(key) => {
+
+    setActiveTab(key);
+
+    if (key.startsWith("warehouse-")) {
+      const id = key.split("-")[1];
+      handleSelectWarehouseInventory(id);
+    }
   }}
-  width={400}
->
-  <Form form={form} layout="vertical" onFinish={handleSaveWarehouse}>
-    <Form.Item
-      label="Warehouse Name"
-      name="warehouseName"
-      rules={[{ required: true, message: "Nhập tên kho" }]}
-    >
-      <Input />
-    </Form.Item>
+  items={[
 
-    <Form.Item
-      label="Location Description"
-      name="locationDescription"
-      rules={[{ required: true, message: "Nhập địa điểm" }]}
-    >
-      <Input />
-    </Form.Item>
+          ...warehouseTabs,
 
-    <Form.Item
-      label="Area ID"
-      name="areaId"
-      rules={[{ required: true, message: "Nhập Area ID" }]}
-    >
-      <InputNumber style={{ width: "100%" }} />
-    </Form.Item>
+          {
+            key: "warehouses",
+            label: "Warehouses",
+            children: (
+              <div className="inventory-card">
+                <Table
+                  rowKey="id"
+                  columns={warehouseColumns}
+                  dataSource={warehouses}
+                />
+              </div>
+            ),
+          },
 
-    <Button type="primary" htmlType="submit" block>
-      {editingWarehouse ? "Update" : "Create"}
-    </Button>
-  </Form>
-</Drawer>
-{/* ================= ITEM DRAWER ================= */}
-<Drawer
-  title={editingItem ? "Edit Relief Item" : "Add Relief Item"}
-  open={itemDrawer}
-  onClose={() => {
-    setItemDrawer(false);
-    setEditingItem(null);
-    itemForm.resetFields();
-  }}
-  width={400}
->
-  <Form form={itemForm} layout="vertical" onFinish={handleSaveItem}>
-    <Form.Item
-      label="Item Name"
-      name="itemName"
-      rules={[{ required: true, message: "Nhập tên vật phẩm" }]}
-    >
-      <Input />
-    </Form.Item>
+          {
+            key: "items",
+            label: "Relief Items",
+            children: (
+              <div className="inventory-card">
 
-    <Form.Item
-      label="Unit"
-      name="unit"
-      rules={[{ required: true, message: "Nhập đơn vị" }]}
-    >
-      <Input />
-    </Form.Item>
+                <Button
+                  type="primary"
+                  style={{ marginBottom: 16 }}
+                  onClick={() => setItemDrawer(true)}
+                >
+                  Add Item
+                </Button>
 
-    <Button type="primary" htmlType="submit" block>
-      {editingItem ? "Update" : "Create"}
-    </Button>
-  </Form>
-</Drawer>
-{/* ================= TRANSACTION DRAWER ================= */}
-<Drawer
-  title="Create Inventory Transaction"
-  open={transactionDrawer}
-  onClose={() => {
-    setTransactionDrawer(false);
-    transactionForm.resetFields();
-  }}
-  width={600}
->
-  <Form
-    form={transactionForm}
-    layout="vertical"
-    onFinish={handleCreateTransaction}
-  >
-    <Form.Item
-      label="Warehouse"
-      name="warehouseId"
-      rules={[{ required: true, message: "Chọn kho" }]}
-    >
-      <Select
-        options={warehouses.map((w) => ({
-          value: w.id,
-          label: w.warehouseName,
-        }))}
-      />
-    </Form.Item>
+                <Table
+                  rowKey="id"
+                  columns={itemColumns}
+                  dataSource={items}
+                />
 
-    <Form.Item
-      label="Rescue Request ID"
-      name="rescueRequestId"
-      rules={[{ required: true, message: "Nhập Rescue Request ID" }]}
-    >
-      <InputNumber style={{ width: "100%" }} />
-    </Form.Item>
+              </div>
+            ),
+          },
 
-    <Form.Item
-      label="Transaction Type"
-      name="transactionType"
-      rules={[{ required: true, message: "Chọn loại giao dịch" }]}
-    >
-      <Select
-        options={[
-          { value: "IN", label: "IN" },
-          { value: "OUT", label: "OUT" },
+          {
+            key: "transactions",
+            label: "Giao dịch",
+            children: (
+              <div className="inventory-card">
+
+                <Tabs
+                  items={[
+                    {
+                      key: "pending",
+                      label: `Pending (${pendingTransactions.length})`,
+                      children: (
+                        <Table
+                          rowKey="id"
+                          columns={transactionColumns}
+                          dataSource={pendingTransactions}
+                        />
+                      ),
+                    },
+                    {
+                      key: "confirmed",
+                      label: `Confirmed (${confirmedTransactions.length})`,
+                      children: (
+                        <Table
+                          rowKey="id"
+                          columns={transactionColumns}
+                          dataSource={confirmedTransactions}
+                        />
+                      ),
+                    },
+                  ]}
+                />
+
+              </div>
+            ),
+          },
         ]}
       />
-    </Form.Item>
 
-    <Form.Item label="Note" name="note">
-      <Input />
-    </Form.Item>
+      {/* DRAWER WAREHOUSE */}
 
-    {/* Dynamic Lines */}
-    <Form.List name="lines">
-      {(fields, { add, remove }) => (
-        <>
-          {fields.map(({ key, name, ...restField }) => (
-            <Space
-              key={key}
-              style={{ display: "flex", marginBottom: 8 }}
-              align="baseline"
-            >
-              <Form.Item
-                {...restField}
-                name={[name, "reliefItemId"]}
-                rules={[{ required: true, message: "Chọn item" }]}
-              >
-                <Select
-                  placeholder="Item"
-                  style={{ width: 200 }}
-                  options={items.map((i) => ({
-                    value: i.id,
-                    label: i.itemName,
-                  }))}
-                />
-              </Form.Item>
+      <Drawer
+        title={editingWarehouse ? "Edit Warehouse" : "Add Warehouse"}
+        open={warehouseDrawer}
+        onClose={() => setWarehouseDrawer(false)}
+        width={420}
+      >
 
-              <Form.Item
-                {...restField}
-                name={[name, "quantity"]}
-                rules={[{ required: true, message: "Nhập số lượng" }]}
-              >
-                <InputNumber placeholder="Quantity" min={1} />
-              </Form.Item>
+        <Form form={form} layout="vertical" onFinish={handleSaveWarehouse}>
 
-              <Button danger onClick={() => remove(name)}>
-                X
-              </Button>
-            </Space>
-          ))}
-
-          <Form.Item>
-            <Button type="dashed" onClick={() => add()} block>
-              + Add Item
-            </Button>
+          <Form.Item
+            label="Warehouse Name"
+            name="warehouseName"
+            rules={[{ required: true }]}
+          >
+            <Input />
           </Form.Item>
-        </>
-      )}
-    </Form.List>
 
-    <Button type="primary" htmlType="submit" block>
-      Create Transaction
-    </Button>
-  </Form>
-</Drawer>
-    </>
+          <Form.Item
+            label="Location Description"
+            name="locationDescription"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Area ID"
+            name="areaId"
+            rules={[{ required: true }]}
+          >
+            <InputNumber style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Button type="primary" htmlType="submit" block>
+            {editingWarehouse ? "Update" : "Create"}
+          </Button>
+
+        </Form>
+
+      </Drawer>
+
+      {/* DRAWER ITEM */}
+
+      <Drawer
+        title={editingItem ? "Edit Item" : "Add Item"}
+        open={itemDrawer}
+        onClose={() => setItemDrawer(false)}
+        width={420}
+      >
+
+        <Form form={itemForm} layout="vertical" onFinish={handleSaveItem}>
+
+          <Form.Item
+            label="Item Name"
+            name="itemName"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Unit"
+            name="unit"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Button type="primary" htmlType="submit" block>
+            {editingItem ? "Update" : "Create"}
+          </Button>
+
+        </Form>
+
+      </Drawer>
+
+    </div>
   );
 }
